@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "tickertape": {
+      "endpoint": "https://mcp.tickertape.in/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_TICKERTAPE_TOKEN_HERE"
+      }
+    }
+  }
+}

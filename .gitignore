@@ -1,0 +1,43 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Credentials & Secret Tokens (CRITICAL: NEVER COMMIT TO GIT)
+*token*.json
+token.json
+tickertape_token.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# Private User Data & Trade Execution Journals (CRITICAL: PRIVATE)
+memory/trade_journal.jsonl
+memory/*trade_journal*.jsonl
+!memory/trade_journal.example.jsonl
+*.private.*
+*.secret.*
+
+# Temporary & Log files
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE & Editor caches
+.vscode/
+.idea/
+.cursor/
+
+# Public Agent Architecture & Calibrated Weights
+!memory/
+!memory/*.json
+!memory/evidence_ledger.jsonl
+!memory/lessons_learned.md
+!memory/trade_journal.example.jsonl

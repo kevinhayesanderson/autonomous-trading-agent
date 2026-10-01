@@ -1,0 +1,15 @@
+# Autonomous Quantitative US Investment Agent
+# Production & Agentic Dependencies
+
+# Core HTTP & Environment
+requests>=2.31.0
+python-dotenv>=1.0.0
+urllib3>=2.0.0
+
+# 2026 SOTA Agentic & Schema Engineering
+pydantic>=2.0.0
+mcp>=1.2.0
+
+# Indian Execution Broker (Zerodha Kite Connect v3)
+kiteconnect>=5.2.0
+

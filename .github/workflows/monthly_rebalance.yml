@@ -1,0 +1,76 @@
+name: Autonomous Monthly Rebalance Cycle
+
+on:
+  schedule:
+    # Runs on the 1st of every month at 14:15 UTC (7:45 PM IST - optimal US market opening window)
+    - cron: '15 14 1 * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Execution mode (paper or live)'
+        required: true
+        default: 'paper'
+        type: choice
+        options:
+          - paper
+          - live
+      execute:
+        description: 'Set to true to execute trades (false for preview)'
+        required: true
+        default: false
+        type: boolean
+      ignore_in_flight:
+        description: 'Ignore pending in-flight LRS bank deposit'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  monthly-cycle:
+    name: Run Monthly Rebalance Engine
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Audit Portfolio & Memory State
+        env:
+          TICKERTAPE_TOKEN: ${{ secrets.TICKERTAPE_TOKEN }}
+          AV_API_KEY: ${{ secrets.AV_API_KEY }}
+          ALPACA_KEY: ${{ secrets.ALPACA_KEY }}
+          ALPACA_SECRET: ${{ secrets.ALPACA_SECRET }}
+        run: |
+          python agent.py status || true
+
+      - name: Execute Rebalancing Cycle
+        env:
+          TICKERTAPE_TOKEN: ${{ secrets.TICKERTAPE_TOKEN }}
+          AV_API_KEY: ${{ secrets.AV_API_KEY }}
+          ALPACA_KEY: ${{ secrets.ALPACA_KEY }}
+          ALPACA_SECRET: ${{ secrets.ALPACA_SECRET }}
+        run: |
+          EXEC_FLAG=""
+          if [ "${{ inputs.execute }}" = "true" ]; then
+            EXEC_FLAG="execute"
+          else
+            EXEC_FLAG="preview"
+          fi
+          
+          IN_FLIGHT_FLAG=""
+          if [ "${{ inputs.ignore_in_flight }}" = "true" ]; then
+            IN_FLIGHT_FLAG="--ignore-in-flight"
+          fi
+          
+          python agent.py $EXEC_FLAG --mode ${{ inputs.mode || 'paper' }} $IN_FLIGHT_FLAG

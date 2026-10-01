@@ -1,0 +1,6 @@
+# Git Mailmap — Canonical Contributor Identity Mapping
+# Syntax: <Proper Name> <Proper Email> <Commit Email>
+Kevin Hayes Anderson <kevinhayesanderson@gmail.com> <kevinhayes_anderson@trimble.com>
+Kevin Hayes Anderson <kevinhayesanderson@gmail.com> <kevinhayesanderson-trimble@users.noreply.github.com>
+Kevin Hayes Anderson <kevinhayesanderson@gmail.com> kevinhayesanderson-trimble <kevinhayes_anderson@trimble.com>
+Kevin Hayes Anderson <kevinhayesanderson@gmail.com> kevinhayesanderson <kevinhayes_anderson@trimble.com>

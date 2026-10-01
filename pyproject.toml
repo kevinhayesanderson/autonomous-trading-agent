@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autonomous-trading-agent"
+version = "2.2.0"
+description = "Autonomous multi-agent quantitative trading system with closed-loop memory, Tickertape MCP & Alpaca execution, 60-day tenure locks, and Zero-Limbo capital control."
+readme = "README.md"
+authors = [
+    { name = "Kevin Hayes Anderson", email = "kevinhayesanderson@users.noreply.github.com" }
+]
+license = { text = "MIT" }
+keywords = [
+    "trading-agent",
+    "autonomous-agents",
+    "multi-agent-systems",
+    "quantitative-trading",
+    "model-context-protocol",
+    "mcp-server",
+    "alpaca-api",
+    "tickertape",
+    "portfolio-optimization",
+    "algorithmic-trading",
+    "agentic-ai",
+    "antigravity"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Intended Audience :: Financial and Insurance Industry"
+]
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "mcp>=1.2.0"
+]
+
+[project.scripts]
+trading-agent = "agent:cli_entrypoint"
+aqta = "agent:cli_entrypoint"
+
+[project.urls]
+Homepage = "https://github.com/kevinhayesanderson/autonomous-trading-agent"
+Repository = "https://github.com/kevinhayesanderson/autonomous-trading-agent.git"
+Documentation = "https://github.com/kevinhayesanderson/autonomous-trading-agent#readme"
+Issues = "https://github.com/kevinhayesanderson/autonomous-trading-agent/issues"

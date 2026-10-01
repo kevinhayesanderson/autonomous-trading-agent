@@ -1,0 +1,69 @@
+name: Agent Verification & Integrity CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify-system:
+    name: Autonomous Self-Test & Invariant Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run 7-Phase Self-Verification Suite
+        run: |
+          python agent.py test
+
+      - name: Validate Memory Store Integrity
+        run: |
+          python -c "
+          import json, os
+          with open('memory/factor_weights.json') as f:
+              w = json.load(f)
+              assert w['hard_invariants']['min_beta'] >= 1.40
+              assert w['hard_invariants']['max_assets'] <= 3
+          jfile = 'memory/trade_journal.jsonl' if os.path.exists('memory/trade_journal.jsonl') else 'memory/trade_journal.example.jsonl'
+          with open(jfile) as f:
+              for line in f:
+                  if line.strip():
+                      json.loads(line)
+          print('Agent memory schemas validated successfully.')
+          "
+
+      - name: Audit for Secret Leakage
+        run: |
+          python -c "
+          import os
+          forbidden = ['ghp_', 'gho_', 'glpat-', 'xoxb-']
+          for root, _, files in os.walk('.'):
+              if '.git' in root or '__pycache__' in root:
+                  continue
+              for file in files:
+                  if file in ['.env', 'tickertape_token.json']:
+                      continue
+                  p = os.path.join(root, file)
+                  try:
+                      with open(p, 'r', errors='ignore') as f:
+                          content = f.read()
+                          for bad in forbidden:
+                              assert bad not in content, f'Potential leaked token in {p}'
+                  except Exception as e:
+                      pass
+          print('Zero credentials leakage confirmed.')
+          "

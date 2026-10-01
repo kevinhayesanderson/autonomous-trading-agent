@@ -1,0 +1,353 @@
+{
+  "version": "2.6.0",
+  "last_calibrated_at": "2026-10-02T05:37:02.080449",
+  "calibration_cycle": "2026-09",
+  "theme": "High-Risk, High-Return Quantitative Momentum & Compute Infrastructure",
+  "fiduciary_mandate": {
+    "philosophy": "Aggressive Asymmetric Compounding Without Ruin Risk",
+    "purpose": "Life-changing capital compounding from monthly salary savings. High return is achieved through structural monopoly compounders with explosive cash flows, NEVER speculative lottery tickets, cash-burning biotechs, or post-IPO hype traps.",
+    "strict_positive_net_margin": true,
+    "max_beta_ceiling": 2.8,
+    "min_market_cap_billions": 20.0,
+    "no_falling_knives": true
+  },
+  "hard_invariants": {
+    "min_beta": 1.4,
+    "max_beta": 2.8,
+    "max_assets": 3,
+    "min_momentum_weight": 0.25,
+    "max_fee_drag_pct": 0.5,
+    "strict_positive_net_margin": true,
+    "min_market_cap_billions": 20.0
+  },
+  "current_weights": {
+    "weight_6m_return": 0.31,
+    "weight_1m_return": 0.15,
+    "weight_beta": 20.0,
+    "beta_clamp_max": 2.5,
+    "weight_fwd_eps": 0.111,
+    "fwd_eps_cap": 250.0,
+    "weight_analyst_upside": 0.15,
+    "weight_analyst_buy_pct": 0.15,
+    "rsi_overbought_threshold": 75.0,
+    "rsi_overbought_penalty": -15.0,
+    "rsi_oversold_threshold": 35.0,
+    "rsi_oversold_boost": 10.0,
+    "earnings_proximity_penalty": -25.0
+  },
+  "adaptation_parameters": {
+    "learning_rate": 0.05,
+    "momentum_attribution_alpha": 0.1,
+    "drawdown_dampener": 0.05
+  },
+  "history": [
+    {
+      "version": "1.0.0",
+      "calibrated_at": "2026-08-01T00:00:00Z",
+      "reason": "Initial baseline multi-factor model with raw unclipped beta.",
+      "weights": {
+        "weight_6m_return": 0.25,
+        "weight_1m_return": 0.15,
+        "weight_beta": 15.0,
+        "weight_fwd_eps": 0.15,
+        "weight_analyst_upside": 0.2,
+        "weight_analyst_buy_pct": 0.15
+      }
+    },
+    {
+      "version": "2.0.0",
+      "calibrated_at": "2026-09-27T18:55:00Z",
+      "reason": "Multi-agent adversarial review: Clamped beta to 2.50 to eliminate ALAB (3.78) distortion; integrated Alpha Vantage RSI overbought guard (-15) and dynamic 48-hour earnings penalty (-25).",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T18:59:20.410667",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:00:27.571052",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:01:35.698863",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:12:48.106162",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:12:59.537839",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:14:21.869347",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:14:45.947452",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.2,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.15,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:28:29.889392",
+      "reason": "Alpha outperformed benchmark; reinforcing 6M momentum weight for trend capture.",
+      "weights": {
+        "weight_6m_return": 0.225,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.137,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.1.0",
+      "calibrated_at": "2026-09-27T19:28:29.896368",
+      "reason": "Alpha outperformed benchmark; reinforcing 6M momentum weight for trend capture.",
+      "weights": {
+        "weight_6m_return": 0.25,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.125,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.2.0",
+      "calibrated_at": "2026-09-27T19:36:00.825199",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.25,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.125,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.3.0",
+      "calibrated_at": "2026-10-01T19:54:39.684110",
+      "reason": "Alpha outperformed benchmark; reinforcing 6M momentum weight for trend capture.",
+      "weights": {
+        "weight_6m_return": 0.275,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.113,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.4.0",
+      "calibrated_at": "2026-10-01T19:56:04.088730",
+      "reason": "Alpha outperformed benchmark; reinforcing 6M momentum weight for trend capture.",
+      "weights": {
+        "weight_6m_return": 0.3,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.101,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.5.0",
+      "calibrated_at": "2026-10-01T20:01:47.190814",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.3,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.101,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.6.0",
+      "calibrated_at": "2026-10-01T20:04:55.436823",
+      "reason": "Performance in line with high-risk benchmark; maintaining current factor balance.",
+      "weights": {
+        "weight_6m_return": 0.3,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.101,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -15.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    }
+  ]
+}
