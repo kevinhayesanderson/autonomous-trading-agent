@@ -42,7 +42,9 @@ from scripts.git_sync import sync_system_to_git
 def cmd_run(args):
     """Executes the unified dual-market investment agent cycle completely from scratch."""
     is_exec = getattr(args, "execute", False) or getattr(args, "confirm", False)
-    run_dual_investment_agent(execute=is_exec)
+    raw_b = getattr(args, "budget", None) or getattr(args, "in_budget", None)
+    in_budget = float(raw_b) if raw_b and raw_b != "auto" else None
+    run_dual_investment_agent(execute=is_exec, in_budget=in_budget)
 
 def cmd_status(args):
     """Audits live portfolio balances, active positions, P&L, and in-flight deposits."""
@@ -345,6 +347,7 @@ def cli_entrypoint():
     for c_name in ["run", "cycle"]:
         p_run = subparsers.add_parser(c_name, help="Run unified dual-market investment agent (Tickertape US + Zerodha Kite IN)")
         p_run.add_argument("--execute", "--confirm", action="store_true", help="Commit confirmed live allocations to both brokers")
+        p_run.add_argument("--budget", "--in-budget", default="auto", help="Target Indian equity budget in INR (default: auto from Kite clear cash)")
 
     # status
     p_status = subparsers.add_parser("status", help="Audit live balances, holdings, and in-flight capital")

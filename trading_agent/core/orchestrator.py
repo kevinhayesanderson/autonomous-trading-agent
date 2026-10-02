@@ -37,7 +37,7 @@ from .config import TRADE_JOURNAL_FILE
 from .rebalance import evaluate_portfolio_rebalance
 from .execution import place_order_with_resilience
 
-def run_dual_investment_agent(execute: bool = False):
+def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] = None):
     """
     Executes the full dual-market institutional cycle end-to-end completely from scratch.
     Dynamically analyzes whole-market universes across Tickertape (US) and Zerodha Kite (IN),
@@ -80,8 +80,10 @@ def run_dual_investment_agent(execute: bool = False):
     is_in_trading, in_session_status = is_nse_market_open()
     primary_in_broker = "Zerodha"
     
-    # Target deployment pool: if Zerodha is funded, use live cash; otherwise default to Rs 16,000 INR planned target
-    if zerodha_cash >= 1000.0:
+    # Target deployment pool: if in_budget provided, use it; elif Zerodha is funded, use live cash; otherwise default to Rs 16,000 INR
+    if in_budget is not None and float(in_budget) > 0.0:
+        in_clear_cash = float(in_budget)
+    elif zerodha_cash >= 1000.0:
         in_clear_cash = zerodha_cash
     else:
         in_clear_cash = 16000.0  # Planned target deployment pool
@@ -189,24 +191,48 @@ def run_dual_investment_agent(execute: bool = False):
 
     # 5.2 Indian Trade Plan Formulation
     print(f"\n[PLAN 2: INDIAN EQUITY CONVICTION BASKET] -> ROUTED TO ZERODHA KITE (DELIVERY CASH / GTT)")
-    approved_in = sorted(
+    
+    statutory_buffer = max(50.0, in_clear_cash * 0.015)
+    in_target_net = in_clear_cash - statutory_buffer
+    
+    candidate_pool = sorted(
         [d for d in in_delibs if d.recommendation == "BUY" and d.veto_votes == 0],
         key=lambda x: (x.confidence_score, x.buy_votes),
         reverse=True
-    )[:3]
+    )
     
-    in_target_net = in_clear_cash * 0.98
-    target_per_in_asset = in_target_net / len(approved_in)
+    # Map candidate prices accurately from Kite LTP or Tickertape metrics
+    cand_price_map = {}
+    for d in candidate_pool:
+        t = d.ticker
+        p = get_zerodha_ltp(t)
+        if not p or p <= 0.0:
+            p = float(cand_map.get(t, {}).get("metrics", {}).get("lastPrice") or cand_map.get(t, {}).get("lastPrice") or 500.0)
+        cand_price_map[t] = p
+
+    # Select candidates that fit comfortably without excessive concentration
+    approved_in = []
+    for d in candidate_pool:
+        p = cand_price_map.get(d.ticker, 500.0)
+        # For small accounts (<= 6000 INR), skip single shares that exceed 45% of total budget
+        if in_clear_cash <= 6000.0 and p > (in_target_net * 0.45):
+            continue
+        approved_in.append(d)
+        if len(approved_in) >= 3:
+            break
+            
+    if not approved_in:
+        approved_in = candidate_pool[:3]
+
+    num_assets = max(1, len(approved_in))
+    target_per_in_asset = in_target_net / num_assets
     
     in_allocations = []
     in_total_invested = 0.0
 
     for d in approved_in:
         t = d.ticker
-        price = get_zerodha_ltp(t)
-        if not price or price <= 0.0:
-            price = float(cand_map.get(t, {}).get("lastPrice") or 500.0)
-
+        price = cand_price_map[t]
         qty = max(1, int(target_per_in_asset // price))
         inv = qty * price
         in_total_invested += inv
@@ -222,10 +248,17 @@ def run_dual_investment_agent(execute: bool = False):
             "deliberation": d
         })
 
-    # Absorb residual cash into lowest price asset
+    # If initial allocation exceeds in_target_net, trim shares from highest invested asset
+    while in_total_invested > in_target_net and any(a["shares"] > 1 for a in in_allocations):
+        highest_inv = max([a for a in in_allocations if a["shares"] > 1], key=lambda x: x["invested"])
+        highest_inv["shares"] -= 1
+        highest_inv["invested"] = round(highest_inv["shares"] * highest_inv["price"], 2)
+        in_total_invested = sum(a["invested"] for a in in_allocations)
+
+    # Absorb residual cash into lowest price asset safely without breaching statutory buffer
     in_cash_buffer = round(in_clear_cash - in_total_invested, 2)
     lowest_in = min(in_allocations, key=lambda x: x["price"])
-    while in_cash_buffer >= lowest_in["price"] and (in_cash_buffer - lowest_in["price"]) >= 50.0:
+    while (in_cash_buffer - lowest_in["price"]) >= statutory_buffer:
         lowest_in["shares"] += 1
         lowest_in["invested"] = round(lowest_in["shares"] * lowest_in["price"], 2)
         in_total_invested += lowest_in["price"]
@@ -295,6 +328,12 @@ def run_dual_investment_agent(execute: bool = False):
                 a["broker_order_id"] = res.get("order_id")
             except Exception as e:
                 print(f"  [!] Zerodha direct order notice for {a['ticker']}: {e}")
+                try:
+                    gtt_res = place_zerodha_gtt(a["ticker"], a["shares"], a["price"], a["stop_loss"], a["take_profit"])
+                    print(f"  + Zerodha GTT Placed: {a['ticker']} | Qty: {a['shares']} | Price: Rs {a['price']} | Trigger ID: {gtt_res.get('trigger_id')}")
+                    a["broker_order_id"] = f"GTT_{gtt_res.get('trigger_id')}"
+                except Exception as e_gtt:
+                    print(f"  [!] Zerodha GTT placement notice for {a['ticker']}: {e_gtt}")
     else:
         if not zerodha_auth:
             print("  [!] Zerodha session token pending. Authenticate via 'python agent.py kite-login'.")
@@ -302,37 +341,41 @@ def run_dual_investment_agent(execute: bool = False):
             print(f"  [!] Note: Zerodha cash (Rs {zerodha_cash:.2f}) is lower than required deployment (Rs {in_total_invested:.2f}).")
             print("      -> Transfer funds into your Zerodha Kite account to execute live on-market.")
 
-    os.makedirs(os.path.dirname(TRADE_JOURNAL_FILE), exist_ok=True)
-    with open(TRADE_JOURNAL_FILE, "a", encoding="utf-8") as f:
-        for a in in_allocations:
-            trade_id = f"in_zerodha_{now.strftime('%Y%m%d_%H%M%S')}_{a['ticker']}"
-            record = {
-                "id": trade_id,
-                "date": date_str,
-                "market": "IN",
-                "exchange": "NSE",
-                "broker": "Zerodha",
-                "currency": "INR",
-                "ticker": a["ticker"],
-                "action": "BUY",
-                "shares": a["shares"],
-                "price": a["price"],
-                "amount": a["invested"],
-                "stop_loss_trigger": a["stop_loss"],
-                "take_profit_target": a["take_profit"],
-                "broker_order_id": a.get("broker_order_id"),
-                "cycle": cycle_str,
-                "plan": "dual-orchestrated",
-                "committee_confidence": a["deliberation"].confidence_score,
-                "committee_votes": f"{a['deliberation'].buy_votes} BUY / {a['deliberation'].veto_votes} VETO",
-                "thesis": a["deliberation"].synthesis_memo
-            }
-            f.write(json.dumps(record) + "\n")
-            logged_ids.append(trade_id)
+    placed_allocations = [a for a in in_allocations if a.get("broker_order_id")]
+    if placed_allocations:
+        os.makedirs(os.path.dirname(TRADE_JOURNAL_FILE), exist_ok=True)
+        with open(TRADE_JOURNAL_FILE, "a", encoding="utf-8") as f:
+            for a in placed_allocations:
+                trade_id = f"in_zerodha_{now.strftime('%Y%m%d_%H%M%S')}_{a['ticker']}"
+                record = {
+                    "id": trade_id,
+                    "date": date_str,
+                    "market": "IN",
+                    "exchange": "NSE",
+                    "broker": "Zerodha",
+                    "currency": "INR",
+                    "ticker": a["ticker"],
+                    "action": "BUY",
+                    "shares": a["shares"],
+                    "price": a["price"],
+                    "amount": a["invested"],
+                    "stop_loss_trigger": a["stop_loss"],
+                    "take_profit_target": a["take_profit"],
+                    "broker_order_id": a.get("broker_order_id"),
+                    "cycle": cycle_str,
+                    "plan": "dual-orchestrated",
+                    "committee_confidence": a["deliberation"].confidence_score,
+                    "committee_votes": f"{a['deliberation'].buy_votes} BUY / {a['deliberation'].veto_votes} VETO",
+                    "thesis": a["deliberation"].synthesis_memo
+                }
+                f.write(json.dumps(record) + "\n")
+                logged_ids.append(trade_id)
 
-    print(f"\n[SUCCESS] Successfully committed {len(logged_ids)} orders into memory/trade_journal.jsonl:")
-    for tid in logged_ids:
-        print(f"  + {tid}")
+        print(f"\n[SUCCESS] Successfully committed {len(logged_ids)} orders into memory/trade_journal.jsonl:")
+        for tid in logged_ids:
+            print(f"  + {tid}")
+    else:
+        print("\n[*] Zero new orders placed with broker. No journal records committed.")
 
     # Synchronize Watchlist in Tickertape PRO
     try:

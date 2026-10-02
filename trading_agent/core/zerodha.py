@@ -137,8 +137,9 @@ def get_zerodha_margin() -> Dict[str, Any]:
     try:
         margins = kite.margins(segment="equity")
         available = margins.get("available", {})
-        cash = float(available.get("cash", 0.0))
-        net = float(margins.get("net", cash))
+        live_bal = float(available.get("live_balance", 0.0))
+        net = float(margins.get("net", live_bal))
+        cash = max(float(available.get("cash", 0.0)), live_bal, net)
         return {
             "clear_cash": cash,
             "cnc_balance_available": net,
