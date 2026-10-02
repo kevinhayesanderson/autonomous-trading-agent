@@ -1,6 +1,6 @@
 {
   "version": "2.6.0",
-  "last_calibrated_at": "2026-10-02T19:14:36.915465",
+  "last_calibrated_at": "2026-10-02T19:16:21.536793",
   "calibration_cycle": "2026-09",
   "theme": "High-Risk, High-Return Quantitative Momentum & Compute Infrastructure",
   "fiduciary_mandate": {
@@ -21,11 +21,11 @@
     "min_market_cap_billions": 20.0
   },
   "current_weights": {
-    "weight_6m_return": 0.33,
+    "weight_6m_return": 0.34,
     "weight_1m_return": 0.15,
     "weight_beta": 20.0,
     "beta_clamp_max": 2.5,
-    "weight_fwd_eps": 0.131,
+    "weight_fwd_eps": 0.141,
     "fwd_eps_cap": 250.0,
     "weight_analyst_upside": 0.15,
     "weight_analyst_buy_pct": 0.15,

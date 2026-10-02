@@ -232,6 +232,29 @@ def get_zerodha_ltp(ticker: str, exchange: str = "NSE") -> Optional[float]:
         pass
     return None
 
+_INSTRUMENT_MAP: Dict[str, str] = {}
+
+def resolve_kite_tradingsymbol(ticker: str, exchange: str = "NSE") -> str:
+    """
+    Resolves base ticker symbol (e.g. SIGMAADV, VMARCIND) to Kite's tradingsymbol
+    (e.g. SIGMAADV-BE, VMARCIND-SM, MARINE) using Kite's instrument master.
+    """
+    global _INSTRUMENT_MAP
+    if not _INSTRUMENT_MAP:
+        kite = get_kite_client()
+        if kite:
+            try:
+                insts = kite.instruments(exchange)
+                for i in insts:
+                    sym = i.get("tradingsymbol", "")
+                    base = sym.split("-")[0]
+                    if base not in _INSTRUMENT_MAP:
+                        _INSTRUMENT_MAP[base] = sym
+                    _INSTRUMENT_MAP[sym] = sym
+            except Exception:
+                pass
+    return _INSTRUMENT_MAP.get(ticker, ticker)
+
 def place_zerodha_order(
     ticker: str,
     qty: int,
@@ -247,12 +270,13 @@ def place_zerodha_order(
     if not kite:
         raise RuntimeError("Zerodha Kite not authenticated. Run: python agent.py kite-login")
 
+    symbol = resolve_kite_tradingsymbol(ticker, exchange=exchange)
     variety = kite.VARIETY_AMO if is_amo else kite.VARIETY_REGULAR
     try:
         order_id = kite.place_order(
             variety=variety,
             exchange=exchange,
-            tradingsymbol=ticker,
+            tradingsymbol=symbol,
             transaction_type=kite.TRANSACTION_TYPE_BUY,
             quantity=qty,
             order_type=kite.ORDER_TYPE_LIMIT,
@@ -263,7 +287,7 @@ def place_zerodha_order(
             "status": "PLACED",
             "order_id": order_id,
             "variety": variety,
-            "ticker": ticker,
+            "ticker": symbol,
             "qty": qty,
             "price": price
         }
@@ -274,7 +298,7 @@ def place_zerodha_order(
                 order_id = kite.place_order(
                     variety=kite.VARIETY_AMO,
                     exchange=exchange,
-                    tradingsymbol=ticker,
+                    tradingsymbol=symbol,
                     transaction_type=kite.TRANSACTION_TYPE_BUY,
                     quantity=qty,
                     order_type=kite.ORDER_TYPE_LIMIT,
@@ -285,7 +309,7 @@ def place_zerodha_order(
                     "status": "PLACED_AMO",
                     "order_id": order_id,
                     "variety": "amo",
-                    "ticker": ticker,
+                    "ticker": symbol,
                     "qty": qty,
                     "price": price,
                     "note": "Automatically converted to AMO because market is closed"
@@ -310,6 +334,7 @@ def place_zerodha_gtt(
     if not kite:
         raise RuntimeError("Zerodha Kite not authenticated. Run: python agent.py kite-login")
 
+    symbol = resolve_kite_tradingsymbol(ticker, exchange=exchange)
     orders = [{
         "transaction_type": kite.TRANSACTION_TYPE_BUY,
         "quantity": qty,
@@ -318,21 +343,25 @@ def place_zerodha_gtt(
         "price": round(price, 2)
     }]
 
+    # Zerodha GTT trigger requirement: Trigger price must differ from last_price by > 0.25%
+    # For limit buy entry, set trigger at 0.5% below limit price
+    trigger_val = round(price * 0.995, 1)
+
     try:
         trigger_id = kite.place_gtt(
             trigger_type=kite.GTT_TYPE_SINGLE,
-            tradingsymbol=ticker,
+            tradingsymbol=symbol,
             exchange=exchange,
-            trigger_values=[round(price, 2)],
+            trigger_values=[trigger_val],
             last_price=round(price, 2),
             orders=orders
         )
         return {
             "status": "PLACED_GTT",
             "trigger_id": trigger_id,
-            "ticker": ticker,
+            "ticker": symbol,
             "qty": qty,
-            "trigger_price": price,
+            "trigger_price": trigger_val,
             "limit_price": price
         }
     except Exception as e:
