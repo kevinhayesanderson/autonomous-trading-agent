@@ -6,8 +6,17 @@ and market calendar resolution directly with the user's Zerodha demat account.
 
 import os
 import json
+import socket
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, time, timezone, timedelta
+
+# Enforce IPv4 egress for kite.trade hosts to guarantee matching whitelisted static IP
+_orig_getaddrinfo = socket.getaddrinfo
+def _kite_getaddrinfo_ipv4(host, port, family=0, type=0, proto=0, flags=0):
+    if host and "kite.trade" in str(host):
+        return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+    return _orig_getaddrinfo(host, port, family, type, proto, flags)
+socket.getaddrinfo = _kite_getaddrinfo_ipv4
 
 from kiteconnect import KiteConnect
 
