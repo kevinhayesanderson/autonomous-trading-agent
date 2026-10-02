@@ -367,6 +367,20 @@ def place_zerodha_gtt(
     except Exception as e:
         raise RuntimeError(f"Zerodha GTT placement failed: {e}")
 
+def get_public_ip() -> Optional[str]:
+    """Retrieves current external public IP address used for broker API egress."""
+    import urllib.request
+    for url in ["https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com"]:
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "curl/7.68.0"})
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                ip = resp.read().decode("utf-8").strip()
+                if ip:
+                    return ip
+        except Exception:
+            continue
+    return None
+
 def audit_kite_status() -> Dict[str, Any]:
     """Provides a complete health and connectivity audit for Zerodha Kite Connect v3."""
     token_data = load_kite_token()
@@ -385,5 +399,6 @@ def audit_kite_status() -> Dict[str, Any]:
         "holdings_count": len(get_zerodha_holdings()) if margin.get("authenticated") else 0,
         "market_open": is_open,
         "market_status": session_status,
+        "public_ip": get_public_ip(),
         "error": margin.get("error")
     }

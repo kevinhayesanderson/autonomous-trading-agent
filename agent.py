@@ -211,6 +211,7 @@ def cmd_kite_status(args):
     print(f"  * Client Account:          {st['user_name']} ({st['user_id']})")
     print(f"  * Registered Email:        {st['email']}")
     print(f"  * Market Session Status:   {st['market_status']}")
+    print(f"  * Current Public IP:       {st.get('public_ip', 'Unknown')}")
     
     if st['authenticated']:
         print(f"\n[*] LIVE ZERODHA ACCOUNT BALANCES:")
