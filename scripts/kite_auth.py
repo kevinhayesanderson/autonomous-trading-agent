@@ -116,22 +116,25 @@ def save_token(session_data: dict):
 def open_url_in_browser(url: str):
     """Reliably opens a URL in Google Chrome or default browser on Windows / cross-platform."""
     import subprocess
-    chrome_paths = [
-        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")
-    ]
-    for cp in chrome_paths:
-        if os.path.exists(cp):
-            try:
-                subprocess.Popen([cp, url])
-                return
-            except Exception:
-                pass
-
     if sys.platform == "win32":
+        # 1. Try launching Chrome executable directly without cmd.exe
+        chrome_paths = [
+            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")
+        ]
+        for cp in chrome_paths:
+            if os.path.exists(cp):
+                try:
+                    subprocess.Popen([cp, url], shell=False)
+                    return
+                except Exception:
+                    pass
+
+        # 2. Try Windows cmd start with caret-escaped ampersands
         try:
-            subprocess.Popen(["cmd.exe", "/c", "start", "", url], shell=True)
+            escaped = url.replace("&", "^&")
+            subprocess.Popen(f'cmd.exe /c start "" "{escaped}"', shell=True)
             return
         except Exception:
             pass
