@@ -137,21 +137,114 @@ sequenceDiagram
 
 ---
 
-## 🧠 SOTA Multi-Agent Deliberation & Extended Thinking
+## 🛡️ Fiduciary Large-Capital Allocation & In-Flight Transit Safety
 
-The reasoning engine implements the NeurIPS AgenticTrading multi-agent committee consensus framework with test-time reasoning traces:
+When deploying substantial capital infusions (such as recurring salary allocations of **₹1,00,000 INR / ~$1,028 USD** via the RBI Liberalised Remittance Scheme), the system activates a specialized **5-Tier Fiduciary Capital Preservation Protocol**:
 
 ```mermaid
 flowchart TD
-    subgraph SpecialistLayer["Specialist Agent Panel"]
-        FA["Fundamental Analyst Agent\n• Moat Rating (1-10)\n• Net Margin Floor (>0%)\n• Forward EPS Growth"]
-        TA["Technical Analyst Agent\n• 6M & 1M Momentum\n• Weekly RSI-14 Boundary\n• 200-Day Trend Integrity"]
-        RM["Fiduciary Risk Manager\n• Beta Sweet Spot (1.4-2.8)\n• 48h Earnings Blackout\n• 60d Tenure Lock Mandate\n• ABSOLUTE VETO POWER"]
+    subgraph InflowLayer["1. Capital Inflow & Banking Transit"]
+        HDFC["Bank Transfer (e.g., HDFC Bank LRS Outward Remittance)"]
+        FX["Live FX Clearing (e.g., ₹97.07 - ₹97.20 / USD)"]
+        TT_IN["Tickertape Fund Gateway Tracker\n(us_account_fund_history_read)"]
+        HDFC --> FX --> TT_IN
+    end
+
+    subgraph SafetyGate["2. Zero-Limbo Gatekeeper & Safety Collars"]
+        TRANSIT{"Funds In Transit?\n(CAPITAL_IN_FLIGHT)"}
+        LOCK["Halt Premature Execution\nLock Unsettled Funds\nAudit Clearing ETAs"]
+        SETTLED["Funds Settled in Broker Cash\n(Zero Limbo Confirmed)"]
+        TRANSIT -- Yes --> LOCK
+        TRANSIT -- No --> SETTLED
+    end
+
+    subgraph SizingLayer["3. Sizing & Anti-Churn Execution"]
+        TENURE{"Active Assets < 60 Days?\n(Tenure Lock Active)"}
+        LOCK_HOLDINGS["Protect Active Leaders (e.g. ASML, TSM, MRVL)\nEliminate 1.17% Fees & 31.2% STCG Tax"]
+        DRAIN_GUARD["50% Wallet-Drain Safety Regulator\n(Tranches <= 0.49 * Settled Cash)"]
+        PROPORTIONAL["Proportional Top-Up into Retained Monopolies\n(e.g., ~$340 per Conviction Titan)"]
+        TENURE -- Yes --> LOCK_HOLDINGS --> DRAIN_GUARD --> PROPORTIONAL
+    end
+
+    subgraph PostExecLayer["4. Zero-Limbo Absorption & Git Sync"]
+        ABSORB["Zero-Limbo Absorption: Stranded Leg 2 Cash -> Leg 1 Leader"]
+        GIT_SYNC["Commit Immutable Trade Record to memory/trade_journal.jsonl & Push to Git"]
+        PROPORTIONAL --> ABSORB --> GIT_SYNC
+    end
+
+    InflowLayer --> SafetyGate
+    SafetyGate --> SizingLayer
+```
+
+### The 5 Capital Safety Invariants:
+1. **Live RBI LRS Remittance Tracker (`us_account_fund_history_read`)**:
+   Tracks in-flight bank remittances with exact transaction IDs, foreign exchange conversion rates, and settlement dates (e.g. T+1/T+2 clearing) directly from the broker's banking gateway.
+2. **Zero-Limbo Pre-Trade Gatekeeper (`CAPITAL_IN_FLIGHT`)**:
+   Freezes automated trade execution while funds are in transit. Prevents premature orders, negative margin violations, or currency slippage. If an order leg fails during live execution, unspent funds are immediately absorbed into primary positions so **0% cash sits stranded in limbo**.
+3. **50% Wallet-Drain Safety Regulator (`WALLET_DRAIN_LIMIT_EXCEEDED`)**:
+   Enforces DriveWealth / Tickertape's rolling 60-minute wallet protection by automatically sizing order tranches to $\le 49\%$ of available settled cash or using recursive micro-drains (`python agent.py drain`), mathematically preventing order rejection.
+4. **60-Day Anti-Churn Tenure Lock (Tax & Fee Shield)**:
+   Active holdings held for $< 60$ days cannot be liquidated for momentum churn. This preserves secular compound compounding, avoids **1.17% round-trip brokerage friction**, and completely shields against **31.2% Indian Short-Term Capital Gains tax on US equities** (and 20% on domestic equities).
+5. **Dynamic Leader Capital Allocation**:
+   When the portfolio is at its $\le 3$ holding capacity and all assets are tenure-locked, fresh salary inflows dynamically top up existing high-conviction leaders proportionally rather than diluting into inferior secondary assets.
+
+---
+
+## 🔬 Institutional Multi-Factor Intelligence Stack (Beyond Basic TA/FA)
+
+A common question is: *Are we just doing basic technical and fundamental analysis alone? Do we track hedge funds or private-mover rumors?*
+
+**The short answer**: AQTA completely rejects noisy day-to-day hedge fund chatter, private-mover Discord/Telegram rumors, and retail options flow—which create taxable churn, fee bleed, and high ruin risk. Instead, AQTA employs an **Institutional Multi-Factor Intelligence Stack** grounded in forward-looking consensus forecasts, smart-money float sponsorship, forensic governance, and exchange regulatory surveillance.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                     AQTA INSTITUTIONAL MULTI-FACTOR INTELLIGENCE STACK                          │
+├───────────────────────────────────┬─────────────────────────────────────────────────────────────┤
+│ Intelligence Layer                │ Forensic Metric / Invariant Source & Rationale              │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1. Forward-Looking Wall Street    │ • forecastEpsGrowthPercent: Forward 12M consensus revisions │
+│    Estimates & Revisions          │ • Upward earnings revision momentum vs static trailing data │
+│                                   │ • Normalizes outlier biases with a +250% ceiling            │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 2. Institutional Equity Research  │ • analystBuyPercent: Institutional research buy consensus   │
+│    Consensus & Target Upside      │ • analystTargetPrice: 12-month Wall Street consensus target │
+│                                   │ • Strict hurdle: Target upside > 0% & Buy Consensus >= 65%  │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 3. Smart-Money Float Sponsorship  │ • instown: Institutional Ownership % of float               │
+│    (Tier-1 Asset Backing)         │ • Sponshorship by BlackRock, Vanguard, sovereign funds, DIIs│
+│                                   │ • Disqualifies un-sponsored retail floats & penny stocks    │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 4. Forensic Governance & Balance  │ • Promoter Pledge Forensics: Disqualifies pledge traps      │
+│    Sheet Stress Testing           │ • Debt-to-Equity Hard Ceiling: Debt/Equity <= 3.0           │
+│                                   │ • Operating Cash Flow & Net Margin > 0.0% (Zero Burners)    │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 5. Regulatory Surveillance        │ • SEBI ASM (Additional Surveillance Measure) screening      │
+│    Defense (SEBI ASM / GSM)       │ • SEBI GSM (Graded Surveillance Measure) screening          │
+│                                   │ • Instant VETO on any exchange surveillance intervention    │
+├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 6. Noise & Churn Immunity         │ • Immune to private-mover leaks, tipsters, & options hype   │
+│    (Anti-Ruin Long-Term Horizon)  │ • Eliminates 31.2% STCG tax drag and high-frequency friction│
+└───────────────────────────────────┴─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🧠 SOTA Multi-Agent Deliberation & Extended Thinking
+
+The reasoning engine implements the NeurIPS AgenticTrading multi-agent committee consensus framework with test-time reasoning traces and strict Pydantic v2 schemas:
+
+```mermaid
+flowchart TD
+    subgraph SpecialistLayer["Specialist Agent Panel (prompts/)"]
+        FA["Fundamental Analyst Agent (prompts/fundamental_analyst.md)\n• Economic Moat Score (1-10)\n• Net Margin Floor (>0% & Positive Cash Flow)\n• Wall Street Forward EPS Growth Revisions\n• Institutional Sponsorship (instown)\n• Promoter Governance & Pledge Forensics"]
+        TA["Technical Analyst Agent (prompts/technical_analyst.md)\n• 6M & 1M Momentum Velocity\n• Weekly RSI-14 Boundary (35 / 75 Collars)\n• 200-Day SMA Trend Integrity\n• Institutional Accumulation vs Churn"]
+        RM["Fiduciary Risk Manager (prompts/risk_manager.md)\n• Bounded Beta Collar (1.40 - 2.80)\n• 48h Earnings Blackout Window (-25 pts)\n• 60d Anti-Churn Tenure Lock\n• SEBI ASM/GSM Surveillance Defense\n• 50% Wallet-Drain Safety Regulator\n• ABSOLUTE VETO POWER"]
+        PM["Portfolio Manager Agent (prompts/portfolio_manager.md)\n• Cross-Sectional Z-Score Q-Synthesis\n• Concentrated Portfolio Cap (<= 3 Holdings)\n• Large-Capital Proportional Sizing\n• Zero-Limbo Capital Absorption\n• Git State Ledger Synchronization"]
     end
 
     subgraph DeliberationLayer["Test-Time Compute & Deliberation Engine"]
         COT["<thinking> Extended Reasoning Trace </thinking>\n• Scenario Stress Testing\n• Downside Ruin Analysis\n• Asymmetric Upside Conviction"]
-        QUORUM{"Committee Quorum Check\n• Any VETO? -> Immediate Rejection\n• >= 2 BUY & 0 VETO? -> Approved\n• Otherwise -> Deferred (HOLD)"}
+        QUORUM{"Committee Quorum Check\n• Any VETO? -> Immediate Global Rejection\n• >= 2 BUY & 0 VETO? -> Approved\n• Otherwise -> Deferred (HOLD)"}
     end
 
     subgraph OutputLayer["Pydantic v2 Schema Output"]
@@ -160,8 +253,17 @@ flowchart TD
 
     FA & TA & RM --> COT
     COT --> QUORUM
-    QUORUM --> RES
+    QUORUM --> PM
+    PM --> RES
 ```
+
+### Specialist System Prompt Directory (`prompts/`)
+| Agent Persona | Prompt File | Core Responsibilities & Institutional Scope |
+| :--- | :--- | :--- |
+| **Fundamental Analyst** | [`prompts/fundamental_analyst.md`](prompts/fundamental_analyst.md) | Economic moat scorecards, net margin floors ($>0\%$), Wall Street forward EPS revisions, institutional analyst consensus, smart-money float sponsorship, and promoter governance forensics. |
+| **Technical Analyst** | [`prompts/technical_analyst.md`](prompts/technical_analyst.md) | 6M/1M relative momentum, 200-day SMA baseline trend integrity, weekly RSI overbought/oversold boundaries, institutional accumulation flow, and anti-churn discipline. |
+| **Chief Risk Officer** | [`prompts/risk_manager.md`](prompts/risk_manager.md) | Bounded beta collars ($1.40 - 2.80$), $\pm 48\text{h}$ earnings blackout penalties, 60-day tenure locks, SEBI ASM/GSM surveillance filters, and 50% wallet-drain protection. **Holds absolute veto authority**. |
+| **Portfolio Manager** | [`prompts/portfolio_manager.md`](prompts/portfolio_manager.md) | Cross-sectional Z-score consensus Q-synthesis, concentrated conviction caps ($\le 3$ assets), large-capital proportional deployment, zero-limbo absorption, and Git memory immutability. |
 
 ### Try Live Committee Deliberation:
 ```bash

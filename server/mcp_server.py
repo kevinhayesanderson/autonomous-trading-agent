@@ -383,8 +383,11 @@ if USE_OFFICIAL_MCP:
         return (
             f"You are the Investment Committee Chair for the Autonomous Quantitative Trading Agent. "
             f"Please conduct an adversarial multi-agent debate on ticker '{ticker}'. "
-            f"Consult the Fundamental Analyst (moat and net margin), Technical Analyst (trend and RSI), "
-            f"and Fiduciary Risk Manager (beta collar and earnings risk). Enforce absolute veto power."
+            f"Consult the Fundamental Analyst (economic moat, net margin floor, Wall Street forward EPS revisions, "
+            f"institutional analyst consensus, smart-money float sponsorship, and promoter pledge forensics), "
+            f"Technical Analyst (6M/1M relative momentum, 200-day trend integrity, weekly RSI oscillator, and institutional accumulation flow), "
+            f"and Fiduciary Risk Manager (beta collar 1.4-2.8, 48h earnings blackout, 60d anti-churn tenure locks, "
+            f"SEBI ASM/GSM surveillance filters, and 50% wallet-drain limits). Enforce absolute veto power against ruin."
         )
 
 # =============================================================================
