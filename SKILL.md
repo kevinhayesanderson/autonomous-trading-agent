@@ -92,14 +92,19 @@ In addition to recurring monthly accumulation, the bot includes a full **Portfol
 
 You do not need to memorize multiple flags, pick stocks, or write complex code. The system is designed around a strict, intuitive **2-Command UX Contract**:
 
+### 🛡️ Seamless Execution Mandate (Zero Codebase Digging)
+* **DO NOT read source code, inspect internal files, or run git log/diff** when running the trading cycle. `agent.py run` is completely self-contained and handles all audits, screening, and status reporting in a single command.
+* **Exact Python Command**: Always invoke using `.\.venv\Scripts\python.exe agent.py run` directly. Never test python paths, check pip lists, or inspect repo code before executing.
+* **If Zerodha Kite session is expired**: `agent.py run` exits cleanly (code 0) and displays the 1-click authorization link directly in its output. Present it cleanly to the user. When the user provides the token/URL, run `.\.venv\Scripts\python.exe agent.py kite-login --token <TOKEN>`, then re-run `.\.venv\Scripts\python.exe agent.py run` to formulate the live plan.
+
 ```
-Step 1: You say: "run investment agent"
-        └──> Agent executes: python agent.py run
+Step 1: You say: "run investment agent" (or "run trading agent")
+        └──> Agent executes: .\.venv\Scripts\python.exe agent.py run
              (Audits dual wallets, Phase 0 retrospectives, whole-market screeners from scratch,
               multi-agent committee deliberations, and previews exact dual-market allocations)
 
 Step 2: You review the preview and say: "execute"
-        └──> Agent executes: python agent.py run --execute
+        └──> Agent executes: .\.venv\Scripts\python.exe agent.py run --execute
              (Commits confirmed US orders to Tickertape/Alpaca, routes Zerodha Kite CNC / GTT orders,
               records immutable trade journal logs, and synchronizes state to Git origin/main)
 ```

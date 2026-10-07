@@ -23,8 +23,13 @@ Strictly adhere to the **Max-2 Interactions Contract** (Zero user choosing, zero
   4. **Multi-Agent Specialist Committee Deliberations**: Fundamental, Technical, and Fiduciary Risk Managers evaluate candidates with test-time reasoning traces (`<thinking>`), moat scorecards, and ASM/GSM surveillance checks.
   5. **Synthesized Dual-Market Allocation Plan**: Generates an objective, decision-free allocation plan:
      - **Plan 1 (US Equities)**: Routed to Tickertape / Alpaca. Evaluates 60-day anti-churn tenure locks and deployable cash.
-     - **Plan 2 (Indian Equities)**: Formulates Zerodha Kite Delivery (CNC) limit orders with integer share sizing against available Kite cash, -12% Stop-Loss and +35% Take-Profit GTT brackets, and statutory cash buffer.
+     - **Plan 2 (Indian Equities)**: Formulates Zerodha Kite Delivery (CNC) limit orders with integer share sizing against available Kite cash, -12% Stop-Loss and +35% Take-Profit GTT brackets, and statutory cash buffer. (If daily Kite session is expired, prompts with the 1-click login link).
 * Present the complete synthesized dual plan and await single user execution confirmation.
+
+### 🛡️ Seamless Execution Mandate (Zero Codebase Digging)
+* **DO NOT read source code, inspect internal files, or run git log/diff** when running the trading cycle. `agent.py run` is completely self-contained and handles all audits, screening, and status reporting in a single command.
+* If Zerodha Kite daily session is expired, `agent.py run` provides the 1-click authorization link directly in its output. Present it cleanly to the user.
+* When user provides the token/URL, run `python agent.py kite-login --token <TOKEN>`, then re-run `python agent.py run` to formulate the live plan.
 
 ### Interaction 2: User replies "execute"
 * When user prompts: *"execute"* / *"execute the plan"* / *"proceed"* / *"execute confirmed trades"*:

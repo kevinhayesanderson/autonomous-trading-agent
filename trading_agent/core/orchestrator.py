@@ -198,10 +198,16 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     in_cash_buffer = 0.0
 
     if not zerodha_auth and (in_budget is None or in_budget <= 0.0):
-        print("  * Status: [PAUSED - AUTHENTICATION REQUIRED]")
-        print("    -> Zerodha Kite session token is expired / pending.")
+        print("  * Status: [PAUSED - DAILY AUTHENTICATION REQUIRED]")
+        print("    -> Zerodha Kite daily session expired at 6:00 AM IST.")
         print("    -> AQTA strictly refuses to fabricate phantom allocations without verified broker access.")
-        print("    -> Authenticate your daily session via: python agent.py kite-login")
+        from scripts.kite_auth import load_credentials
+        try:
+            k_key, _, _ = load_credentials()
+            print(f"    👉 Authorize today's session: https://kite.zerodha.com/connect/login?api_key={k_key}&v=3")
+        except Exception:
+            pass
+        print("    -> Reply with the request_token or redirected URL to commit live Indian orders.")
     elif in_clear_cash < 500.0:
         print(f"  * Status: [HOLD CASH - INSUFFICIENT FUNDS]")
         print(f"    -> Clear cash balance (Rs {in_clear_cash:,.2f} INR) is below minimum investment threshold (Rs 500.00).")

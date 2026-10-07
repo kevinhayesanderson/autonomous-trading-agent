@@ -193,12 +193,17 @@ python agent.py kite-status
 
 When an AI agent is requested to execute an investment cycle, it MUST follow this strict 2-interaction protocol with **zero static blueprints or hardcoded stock picks**:
 
+### 🛡️ Seamless Execution Mandate (Zero Codebase Digging)
+* **DO NOT read source code, inspect internal files, or run git log/diff** when running the trading cycle. `agent.py run` is completely self-contained and handles all audits, screening, and status reporting in a single command.
+* **Exact Python Command**: Always invoke using `.\.venv\Scripts\python.exe agent.py run` directly. Never test python paths, check pip lists, or inspect repo code before executing.
+* **If Zerodha Kite session is expired**: `agent.py run` exits cleanly (code 0) and displays the 1-click authorization link directly in its output. Present it cleanly to the user. When the user provides the token/URL, run `.\.venv\Scripts\python.exe agent.py kite-login --token <TOKEN>`, then re-run `.\.venv\Scripts\python.exe agent.py run` to formulate the live plan.
+
 ```
-[Trigger 1: User prompts "run investment agent"]
+[Trigger 1: User prompts "run investment agent" or "run trading agent"]
                       │
                       ▼
           Step 1: Dual-Market Analysis & Synthesized Plan
-          `python agent.py run` (or `python agent.py cycle`)
+          `.\.venv\Scripts\python.exe agent.py run`
                       │
                       ├─► Audit Live Balances (Tickertape US + Zerodha Kite India)
                       ├─► Phase 0 Retrospectives (SOXX & Nifty Midcap benchmarks)
@@ -215,7 +220,7 @@ When an AI agent is requested to execute an investment cycle, it MUST follow thi
                       │
                       ▼
           Step 2: Live Dual-Market Execution & State Commit
-          `python agent.py run --execute`
+          `.\.venv\Scripts\python.exe agent.py run --execute`
                       │
                       ├─► Live Orders: US (Tickertape/Alpaca) & IN (Zerodha Kite Delivery CNC / GTT)
                       ├─► GTT Risk Collars: -12% Stop-Loss & +35% Take-Profit
