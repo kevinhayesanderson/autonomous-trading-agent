@@ -1,6 +1,6 @@
 {
   "version": "2.6.0",
-  "last_calibrated_at": "2026-10-02T19:16:21.536793",
+  "last_calibrated_at": "2026-10-07T09:57:53.500124",
   "calibration_cycle": "2026-09",
   "theme": "High-Risk, High-Return Quantitative Momentum & Compute Infrastructure",
   "fiduciary_mandate": {
@@ -21,7 +21,7 @@
     "min_market_cap_billions": 20.0
   },
   "current_weights": {
-    "weight_6m_return": 0.34,
+    "weight_6m_return": 0.35,
     "weight_1m_return": 0.15,
     "weight_beta": 20.0,
     "beta_clamp_max": 2.5,
