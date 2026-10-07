@@ -81,7 +81,7 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
         print("  * Initiating seamless browser authentication on default browser...")
         try:
             from scripts.kite_auth import seamless_authenticate
-            auto_tok = seamless_authenticate(timeout_seconds=60, open_browser=True)
+            auto_tok = seamless_authenticate(timeout_seconds=300, open_browser=True, loop=True)
             if auto_tok:
                 zerodha_margin = get_zerodha_margin()
                 zerodha_auth = zerodha_margin.get("authenticated", False)

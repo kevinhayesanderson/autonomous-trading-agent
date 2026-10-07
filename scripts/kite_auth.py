@@ -117,14 +117,7 @@ def open_url_in_browser(url: str):
     """Reliably opens a URL in Google Chrome or default browser on Windows / cross-platform."""
     import subprocess
     if sys.platform == "win32":
-        # 1. Native Windows Explorer shell (guarantees interactive desktop browser launch)
-        try:
-            subprocess.Popen(f'explorer.exe "{url}"', shell=True)
-            return
-        except Exception:
-            pass
-
-        # 2. Try launching Chrome executable directly without cmd.exe
+        # 1. Direct Chrome executable launch (shell=False prevents any cmd ampersand expansion bugs)
         chrome_paths = [
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -138,25 +131,37 @@ def open_url_in_browser(url: str):
                 except Exception:
                     pass
 
-        # 3. Try Windows cmd start with caret-escaped ampersands
+        # 2. Native Windows Explorer shell (shell=False)
         try:
-            escaped = url.replace("&", "^&")
-            subprocess.Popen(f'cmd.exe /c start "" "{escaped}"', shell=True)
+            subprocess.Popen(["explorer.exe", url], shell=False)
             return
         except Exception:
             pass
+
+        # 3. Microsoft Edge executable fallback
+        edge_paths = [
+            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+        ]
+        for ep in edge_paths:
+            if os.path.exists(ep):
+                try:
+                    subprocess.Popen([ep, url], shell=False)
+                    return
+                except Exception:
+                    pass
 
     try:
         webbrowser.open(url)
     except Exception:
         pass
 
-def seamless_authenticate(timeout_seconds: int = 60, open_browser: bool = True):
+def seamless_authenticate(timeout_seconds: int = 300, open_browser: bool = True, loop: bool = True):
     """
     Seamless background authentication for Zerodha Kite Connect v3:
     1. Spins up local callback server on http://127.0.0.1:8000/
-    2. Opens default browser to Kite login URL (where user already has an active Kite session)
-    3. Kite automatically redirects to local callback with request_token
+    2. Opens default browser to Kite login URL
+    3. Runs in loop listening for callback and re-triggering browser launch if needed
     4. Automatically exchanges request_token for access_token, saves to .kite_token.json, and returns token.
     Returns access_token on success, or None on timeout/failure.
     """
@@ -191,11 +196,23 @@ def seamless_authenticate(timeout_seconds: int = 60, open_browser: bool = True):
     print(f"  * Listening on http://{host}:{port}/ for callback (waiting up to {timeout_seconds}s)...", flush=True)
     print(f"    -> If prompted in your browser tab, please click 'Authorize'...", flush=True)
     start_time = time.time()
+    last_retrigger = start_time
+    attempt = 1
     try:
         while CallbackHandler.request_token is None:
-            if time.time() - start_time > timeout_seconds:
+            now = time.time()
+            if (now - start_time) > timeout_seconds:
                 print(f"  [!] Seamless browser authorization timed out after {timeout_seconds}s.", flush=True)
                 break
+
+            # If looping and 15s elapsed without callback, re-launch browser tab to ensure user sees it
+            if loop and (now - last_retrigger) >= 15.0 and open_browser and not os.environ.get("HEADLESS"):
+                attempt += 1
+                last_retrigger = now
+                rem = int(timeout_seconds - (now - start_time))
+                print(f"  * [Loop Attempt {attempt}] Still waiting on http://{host}:{port}/ ({rem}s remaining)... Re-triggering browser tab...", flush=True)
+                open_url_in_browser(login_url)
+
             server.handle_request()
     finally:
         if server:
