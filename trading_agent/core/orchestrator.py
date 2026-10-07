@@ -195,7 +195,7 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
             print(f"    -> HOLD {h['ticker']}: Val ${h['current']:.2f} | P&L: {h['pnl_pct']:>+5.2f}% (Tenure locked)")
         print("  * ACTION: HOLD ACTIVE CONVICTION BASKET. Zero churn required.")
     else:
-        fresh_us_cash = min(1000.0, max(10.0, us_avail * 0.99))
+        fresh_us_cash = max(10.0, us_avail * 0.99)
         us_rebal_res = evaluate_portfolio_rebalance(us_holdings, us_candidates, fresh_cash=fresh_us_cash)
         us_target_buys = us_rebal_res.get("target_buys", [])
         print("\n  --- TARGET US REINVESTMENT BASKET (BUY LEGS ROUTED TO TICKERTAPE / ALPACA) ---")
