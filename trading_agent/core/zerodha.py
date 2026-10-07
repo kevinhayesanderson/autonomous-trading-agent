@@ -426,7 +426,7 @@ def get_public_ip() -> Optional[str]:
     for url in ["https://api.ipify.org", "https://ifconfig.me/ip", "https://icanhazip.com"]:
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "curl/7.68.0"})
-            with urllib.request.urlopen(req, timeout=3) as resp:
+            with urllib.request.urlopen(req, timeout=3) as resp:  # nosec B310
                 ip = resp.read().decode("utf-8").strip()
                 if ip:
                     return ip

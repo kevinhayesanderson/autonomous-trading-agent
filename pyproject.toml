@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "autonomous-trading-agent"
 version = "2.2.0"
-description = "Autonomous multi-agent quantitative trading system with closed-loop memory, Tickertape MCP & Alpaca execution, 60-day tenure locks, and Zero-Limbo capital control."
+description = "Institutional multi-agent quantitative trading system with closed-loop memory, dual-market US & Indian equity execution, 60-day tenure locks, and Zero-Limbo capital control."
 readme = "README.md"
 authors = [
     { name = "Kevin Hayes Anderson", email = "kevinhayesanderson@users.noreply.github.com" }
@@ -20,6 +20,7 @@ keywords = [
     "mcp-server",
     "alpaca-api",
     "tickertape",
+    "zerodha-kite",
     "portfolio-optimization",
     "algorithmic-trading",
     "agentic-ai",
@@ -39,8 +40,17 @@ requires-python = ">=3.10"
 dependencies = [
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",
+    "urllib3>=2.0.0",
     "pydantic>=2.0.0",
-    "mcp>=1.2.0"
+    "mcp>=1.2.0",
+    "kiteconnect>=5.2.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit>=1.7.5",
+    "pip-audit>=2.7.0",
+    "pytest>=8.0.0"
 ]
 
 [project.scripts]
@@ -52,3 +62,18 @@ Homepage = "https://github.com/kevinhayesanderson/autonomous-trading-agent"
 Repository = "https://github.com/kevinhayesanderson/autonomous-trading-agent.git"
 Documentation = "https://github.com/kevinhayesanderson/autonomous-trading-agent#readme"
 Issues = "https://github.com/kevinhayesanderson/autonomous-trading-agent/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]
+skips = ["B101", "B404", "B603"]
