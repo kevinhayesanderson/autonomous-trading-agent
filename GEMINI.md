@@ -42,7 +42,7 @@ Strictly adhere to the **Max-2 Interactions Contract** (Zero user choosing, zero
   1. Live order execution for US (Tickertape / Alpaca) and automated Delivery CNC / GTT order routing for IN (Zerodha Kite Connect v3).
   2. Commits executed trades with timestamped IDs, committee votes, confidence scores, and thesis memos into `memory/trade_journal.jsonl`.
   3. Synchronizes master multi-market watchlist on Tickertape PRO.
-  4. Commits memory state, factor weights, and trade logs to remote Git (`origin/main`) authored by `Kevin Hayes Anderson`.
+  4. Commits memory state, factor weights, and trade logs to remote Git (`origin/main`) under configured Git author.
   5. Reports completion status to user. Done in 2 interactions!
 
 ---

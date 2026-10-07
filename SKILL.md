@@ -118,7 +118,7 @@ Step 2: You review the preview and say: "execute"
 ## 5. Execution Window & Capital Delay Management
 
 ### A. Real-World LRS Clearance Dynamics:
-Inward USD deposits via HDFC outward remittance under RBI LRS take **21 to 53 hours** (or up to 100 hours over national holidays such as Gandhi Jayanti on October 2). The 3-State Capital Controller (`CAPITAL_IN_FLIGHT`) protects in-transit funds from premature commitment.
+Inward USD deposits via outward bank remittance under RBI LRS take **24 to 48 hours** (or up to 72–96 hours over bank holidays or weekends). The 3-State Capital Controller (`CAPITAL_IN_FLIGHT`) protects in-transit funds from premature commitment.
 
 ### B. Zerodha Kite Connect v3 Execution Truth:
 Zerodha Kite Connect v3 provides direct programmatic order execution for Delivery Cash (CNC), After-Market Orders (AMO), and 1-year Good-Till-Triggered (GTT) brackets. The engine routes precision limit orders directly through the Kite Connect REST API, attaches -12% Stop-Loss and +35% Take-Profit GTT brackets, logs them to `memory/trade_journal.jsonl`, and updates the Tickertape PRO Master Watchlist.

@@ -166,7 +166,7 @@ python agent.py kite-status
   "mcpServers": {
     "trading-agent": {
       "command": "python",
-      "args": ["C:/Users/kevin/trading-agent/server/mcp_server.py"],
+      "args": ["path/to/trading-agent/server/mcp_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8"
       }
@@ -181,7 +181,7 @@ python agent.py kite-status
   "mcpServers": {
     "trading-agent": {
       "command": "python",
-      "args": ["C:/Users/kevin/trading-agent/server/mcp_server.py"]
+      "args": ["path/to/trading-agent/server/mcp_server.py"]
     }
   }
 }
@@ -230,7 +230,7 @@ When an AI agent is requested to execute an investment cycle, it MUST follow thi
                       ├─► GTT Risk Collars: -12% Stop-Loss & +35% Take-Profit
                       ├─► Immutable Trade Journal Logging (memory/trade_journal.jsonl)
                       ├─► Master Multi-Market Watchlist Sync (Tickertape PRO)
-                      └─► Auto-Commit & Push to origin/main (Kevin Hayes Anderson)
+                      └─► Auto-Commit & Push to origin/main (Configured Git Author)
 ```
 
 ---

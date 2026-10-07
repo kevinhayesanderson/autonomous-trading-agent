@@ -47,7 +47,7 @@ def audit_tenure_lock(ticker: str, tenure_days: Optional[int] = None) -> Tuple[b
 
 def audit_lrs_settlement(token: str) -> List[Dict[str, Any]]:
     """Audits RBI LRS outward remittances and detects in-flight bank transfers."""
-    print("\n--- RBI LRS & Banking Clearance Audit (HDFC -> US Broker) ---")
+    print("\n--- RBI LRS & Banking Clearance Audit (AD Bank -> US Broker) ---")
     fund_res = call_tickertape_mcp(token, "us_account_fund_history_read")
     transactions = fund_res.get("transactions", []) if isinstance(fund_res, dict) else []
     
@@ -84,7 +84,7 @@ def audit_lrs_settlement(token: str) -> List[Dict[str, Any]]:
     else:
         print("  * In-Flight LRS Transfers: None currently in transit.")
 
-    print("  * Operational Banking Rule: HDFC outward remittance cut-off is 1:00 PM IST.")
+    print("  * Operational Banking Rule: Bank outward remittance cut-off is typically 1:00 PM IST.")
     return pending
 
 def audit_portfolio_health(token: str) -> Tuple[List[Tuple[str, str, float]], List[Dict[str, Any]]]:
