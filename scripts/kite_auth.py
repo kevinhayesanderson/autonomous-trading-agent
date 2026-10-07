@@ -114,42 +114,76 @@ def save_token(session_data: dict):
             print(f"  [!] Note: could not write to {path}: {e}")
 
 def open_url_in_browser(url: str):
-    """Reliably opens a URL in Google Chrome or default browser on Windows / cross-platform."""
+    """Reliably opens a URL in the user's interactive browser on Windows (bridging out of sandbox desktop if needed)."""
     import subprocess
     if sys.platform == "win32":
-        # 1. Direct Chrome executable launch (shell=False prevents any cmd ampersand expansion bugs)
-        chrome_paths = [
-            r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-            r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-            os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")
-        ]
-        for cp in chrome_paths:
-            if os.path.exists(cp):
-                try:
-                    subprocess.Popen([cp, url], shell=False)
-                    return
-                except Exception:
-                    pass
+        try:
+            import ctypes
+            from ctypes import wintypes
 
-        # 2. Native Windows Explorer shell (shell=False)
+            class STARTUPINFO(ctypes.Structure):
+                _fields_ = [
+                    ("cb", wintypes.DWORD),
+                    ("lpReserved", wintypes.LPWSTR),
+                    ("lpDesktop", wintypes.LPWSTR),
+                    ("lpTitle", wintypes.LPWSTR),
+                    ("dwX", wintypes.DWORD),
+                    ("dwY", wintypes.DWORD),
+                    ("dwXSize", wintypes.DWORD),
+                    ("dwYSize", wintypes.DWORD),
+                    ("dwXCountChars", wintypes.DWORD),
+                    ("dwYCountChars", wintypes.DWORD),
+                    ("dwFillAttribute", wintypes.DWORD),
+                    ("dwFlags", wintypes.DWORD),
+                    ("wShowWindow", wintypes.WORD),
+                    ("cbReserved2", wintypes.WORD),
+                    ("lpReserved2", ctypes.c_void_p),
+                    ("hStdInput", wintypes.HANDLE),
+                    ("hStdOutput", wintypes.HANDLE),
+                    ("hStdError", wintypes.HANDLE),
+                ]
+
+            class PROCESS_INFORMATION(ctypes.Structure):
+                _fields_ = [
+                    ("hProcess", wintypes.HANDLE),
+                    ("hThread", wintypes.HANDLE),
+                    ("dwProcessId", wintypes.DWORD),
+                    ("dwThreadId", wintypes.DWORD),
+                ]
+
+            kernel32 = ctypes.windll.kernel32
+            si = STARTUPINFO()
+            si.cb = ctypes.sizeof(STARTUPINFO)
+            si.lpDesktop = "WinSta0\\Default"
+            pi = PROCESS_INFORMATION()
+
+            # 1. Native Windows Explorer shell targeted at interactive WinSta0\Default desktop
+            cmd = f'explorer.exe "{url}"'
+            success = kernel32.CreateProcessW(
+                None,
+                ctypes.c_wchar_p(cmd),
+                None,
+                None,
+                False,
+                0,
+                None,
+                None,
+                ctypes.byref(si),
+                ctypes.byref(pi),
+            )
+            if success:
+                kernel32.CloseHandle(pi.hProcess)
+                kernel32.CloseHandle(pi.hThread)
+                return
+        except Exception:
+            pass
+
+        # 2. Explorer fallback via subprocess
         try:
             subprocess.Popen(["explorer.exe", url], shell=False)
             return
         except Exception:
             pass
-
-        # 3. Microsoft Edge executable fallback
-        edge_paths = [
-            r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
-        ]
-        for ep in edge_paths:
-            if os.path.exists(ep):
-                try:
-                    subprocess.Popen([ep, url], shell=False)
-                    return
-                except Exception:
-                    pass
 
     try:
         webbrowser.open(url)
