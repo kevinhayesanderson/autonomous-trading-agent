@@ -25,7 +25,8 @@ from .zerodha import (
     is_nse_market_open,
     place_zerodha_order,
     place_zerodha_gtt,
-    get_zerodha_ltp
+    get_zerodha_ltp,
+    is_nse_mainboard_tradable
 )
 from .in_screener import screen_indian_stocks, audit_indian_stock
 from .deliberation import deliberate_ticker
@@ -98,7 +99,15 @@ def run_in_pipeline(
         limit=10
     )
 
-    cand_map = {s.get("ticker"): s for s in screened_raw if s.get("ticker")}
+    cand_map = {}
+    for s in screened_raw:
+        t = s.get("ticker")
+        if not t:
+            continue
+        if is_nse_mainboard_tradable(t):
+            cand_map[t] = s
+        else:
+            print(f"  [DISQUALIFIED] {t}: SME lot size restriction or non-NSE mainboard. Retail integer sizing prohibited.")
     candidate_tickers = list(cand_map.keys())
 
     # =========================================================================

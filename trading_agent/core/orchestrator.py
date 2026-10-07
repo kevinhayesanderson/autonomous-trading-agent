@@ -22,7 +22,8 @@ from .zerodha import (
     get_zerodha_ltp,
     is_nse_market_open,
     audit_kite_status,
-    get_kite_client
+    get_kite_client,
+    is_nse_mainboard_tradable
 )
 from .memory import (
     load_factor_weights,
@@ -142,8 +143,16 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     
     # 3.2 Indian Screener - Dynamic Whole-Market Scan from Scratch
     print("  * Indian Market Scan (Tickertape PRO): Beta >= 1.40, MCap > Rs 2,000 Cr, ROE >= 12%, Op Margin >= 10%...")
-    in_screened = screen_indian_stocks(min_beta=1.40, max_beta=2.80, min_mcap_cr=2000.0, min_roe=12.0, min_opmg=10.0, limit=8)
-    cand_map = {s.get("ticker"): s for s in in_screened if s.get("ticker")}
+    in_screened = screen_indian_stocks(min_beta=1.40, max_beta=2.80, min_mcap_cr=2000.0, min_roe=12.0, min_opmg=10.0, limit=10)
+    cand_map = {}
+    for s in in_screened:
+        t = s.get("ticker")
+        if not t:
+            continue
+        if is_nse_mainboard_tradable(t):
+            cand_map[t] = s
+        else:
+            print(f"  [DISQUALIFIED] {t}: SME lot size restriction or non-NSE mainboard. Retail integer sizing prohibited.")
     in_candidate_tickers = list(cand_map.keys())
 
     # =========================================================================
@@ -361,13 +370,7 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
                 print(f"  + Zerodha Order Placed: {a['ticker']} | Qty: {a['shares']} | Price: Rs {a['price']} | ID: {res.get('order_id')} | Status: {res.get('status')}")
                 a["broker_order_id"] = res.get("order_id")
             except Exception as e:
-                print(f"  [!] Zerodha direct order notice for {a['ticker']}: {e}")
-                try:
-                    gtt_res = place_zerodha_gtt(a["ticker"], a["shares"], a["price"], a["stop_loss"], a["take_profit"])
-                    print(f"  + Zerodha GTT Placed: {a['ticker']} | Qty: {a['shares']} | Price: Rs {a['price']} | Trigger ID: {gtt_res.get('trigger_id')}")
-                    a["broker_order_id"] = f"GTT_{gtt_res.get('trigger_id')}"
-                except Exception as e_gtt:
-                    print(f"  [!] Zerodha GTT placement notice for {a['ticker']}: {e_gtt}")
+                print(f"  [!] Zerodha direct order placement failed for {a['ticker']}: {e}")
     else:
         if not zerodha_auth:
             print("  [!] Zerodha session token pending. Authenticate via 'python agent.py kite-login'.")

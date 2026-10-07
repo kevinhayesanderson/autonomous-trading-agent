@@ -242,27 +242,57 @@ def get_zerodha_ltp(ticker: str, exchange: str = "NSE") -> Optional[float]:
     return None
 
 _INSTRUMENT_MAP: Dict[str, str] = {}
+_INSTRUMENT_DETAILS: Dict[str, Dict[str, Any]] = {}
+
+def init_kite_instruments(exchange: str = "NSE") -> None:
+    """Loads and caches all Kite instrument specifications for the given exchange."""
+    global _INSTRUMENT_MAP, _INSTRUMENT_DETAILS
+    if _INSTRUMENT_MAP:
+        return
+    kite = get_kite_client()
+    if kite:
+        try:
+            insts = kite.instruments(exchange)
+            for i in insts:
+                sym = i.get("tradingsymbol", "")
+                base = sym.split("-")[0]
+                if base not in _INSTRUMENT_MAP:
+                    _INSTRUMENT_MAP[base] = sym
+                _INSTRUMENT_MAP[sym] = sym
+                _INSTRUMENT_DETAILS[sym] = i
+                if base not in _INSTRUMENT_DETAILS:
+                    _INSTRUMENT_DETAILS[base] = i
+        except Exception:
+            pass
 
 def resolve_kite_tradingsymbol(ticker: str, exchange: str = "NSE") -> str:
     """
     Resolves base ticker symbol (e.g. SIGMAADV, VMARCIND) to Kite's tradingsymbol
     (e.g. SIGMAADV-BE, VMARCIND-SM, MARINE) using Kite's instrument master.
     """
-    global _INSTRUMENT_MAP
-    if not _INSTRUMENT_MAP:
-        kite = get_kite_client()
-        if kite:
-            try:
-                insts = kite.instruments(exchange)
-                for i in insts:
-                    sym = i.get("tradingsymbol", "")
-                    base = sym.split("-")[0]
-                    if base not in _INSTRUMENT_MAP:
-                        _INSTRUMENT_MAP[base] = sym
-                    _INSTRUMENT_MAP[sym] = sym
-            except Exception:
-                pass
+    init_kite_instruments(exchange)
     return _INSTRUMENT_MAP.get(ticker, ticker)
+
+def is_nse_mainboard_tradable(ticker: str, exchange: str = "NSE") -> bool:
+    """
+    Validates whether an Indian stock is tradable on the standard NSE mainboard
+    with integer share sizing (lot_size == 1). Disqualifies SME board stocks (-SM, -ST)
+    where retail integer share orders are forbidden and rejected by the exchange.
+    """
+    init_kite_instruments(exchange)
+    sym = resolve_kite_tradingsymbol(ticker, exchange)
+    details = _INSTRUMENT_DETAILS.get(sym) or _INSTRUMENT_DETAILS.get(ticker)
+    if not details:
+        clean = ticker.upper().strip()
+        if clean.endswith("-SM") or clean.endswith("-ST") or clean.endswith(".SM"):
+            return False
+        return True
+
+    clean_sym = details.get("tradingsymbol", "")
+    if clean_sym.endswith("-SM") or clean_sym.endswith("-ST"):
+        return False
+    lot = details.get("lot_size", 1)
+    return lot == 1
 
 def place_zerodha_order(
     ticker: str,
@@ -272,14 +302,26 @@ def place_zerodha_order(
     exchange: str = "NSE"
 ) -> Dict[str, Any]:
     """
-    Places a live Delivery (CNC) limit order on Zerodha.
+    Places a live Delivery (CNC) marketable limit order on Zerodha.
     Supports regular market orders or AMO (After Market Orders) when exchanges are closed.
+    Uses a +0.5% marketable limit collar to guarantee immediate fill upon placement/market open.
     """
     kite = get_kite_client()
     if not kite:
         raise RuntimeError("Zerodha Kite not authenticated. Run: python agent.py kite-login")
 
+    init_kite_instruments(exchange)
     symbol = resolve_kite_tradingsymbol(ticker, exchange=exchange)
+    details = _INSTRUMENT_DETAILS.get(symbol, {})
+    lot_size = details.get("lot_size", 1)
+    if lot_size > 1:
+        raise ValueError(f"Ticker {symbol} is an SME instrument with minimum lot size {lot_size}. Retail integer sizing prohibited.")
+
+    tick_size = details.get("tick_size", 0.05) or 0.05
+    # Apply a +0.5% marketable ceiling to ensure immediate execution, rounded to exchange tick size
+    buffered_price = price * 1.005
+    limit_price = round(round(buffered_price / tick_size) * tick_size, 2)
+
     variety = kite.VARIETY_AMO if is_amo else kite.VARIETY_REGULAR
     try:
         order_id = kite.place_order(
@@ -290,15 +332,16 @@ def place_zerodha_order(
             quantity=qty,
             order_type=kite.ORDER_TYPE_LIMIT,
             product=kite.PRODUCT_CNC,
-            price=round(price, 2)
+            price=limit_price
         )
         return {
-            "status": "PLACED",
+            "status": "PLACED_AMO" if is_amo else "PLACED",
             "order_id": order_id,
             "variety": variety,
             "ticker": symbol,
             "qty": qty,
-            "price": price
+            "price": limit_price,
+            "ref_price": price
         }
     except Exception as e:
         # If regular order failed due to market closed, retry automatically as AMO
@@ -312,7 +355,7 @@ def place_zerodha_order(
                     quantity=qty,
                     order_type=kite.ORDER_TYPE_LIMIT,
                     product=kite.PRODUCT_CNC,
-                    price=round(price, 2)
+                    price=limit_price
                 )
                 return {
                     "status": "PLACED_AMO",
@@ -320,7 +363,8 @@ def place_zerodha_order(
                     "variety": "amo",
                     "ticker": symbol,
                     "qty": qty,
-                    "price": price,
+                    "price": limit_price,
+                    "ref_price": price,
                     "note": "Automatically converted to AMO because market is closed"
                 }
             except Exception as e2:
