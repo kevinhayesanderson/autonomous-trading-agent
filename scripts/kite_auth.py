@@ -14,6 +14,15 @@ from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from kiteconnect import KiteConnect
 
 TOKEN_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".kite_token.json"))
@@ -104,6 +113,34 @@ def save_token(session_data: dict):
         except Exception as e:
             print(f"  [!] Note: could not write to {path}: {e}")
 
+def open_url_in_browser(url: str):
+    """Reliably opens a URL in Google Chrome or default browser on Windows / cross-platform."""
+    import subprocess
+    chrome_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")
+    ]
+    for cp in chrome_paths:
+        if os.path.exists(cp):
+            try:
+                subprocess.Popen([cp, url])
+                return
+            except Exception:
+                pass
+
+    if sys.platform == "win32":
+        try:
+            subprocess.Popen(["cmd.exe", "/c", "start", "", url], shell=True)
+            return
+        except Exception:
+            pass
+
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
+
 def seamless_authenticate(timeout_seconds: int = 60, open_browser: bool = True):
     """
     Seamless background authentication for Zerodha Kite Connect v3:
@@ -137,15 +174,12 @@ def seamless_authenticate(timeout_seconds: int = 60, open_browser: bool = True):
         return None
 
     if open_browser and not os.environ.get("HEADLESS"):
-        print(f"  * Hitting default browser with Zerodha Kite authorization URL...", flush=True)
+        print(f"  * Launching browser with Zerodha Kite authorization URL...", flush=True)
         print(f"    -> {login_url}", flush=True)
-        try:
-            webbrowser.open(login_url)
-        except Exception as e:
-            print(f"  [!] Could not launch browser automatically: {e}", flush=True)
+        open_url_in_browser(login_url)
 
     print(f"  * Listening on http://{host}:{port}/ for callback (waiting up to {timeout_seconds}s)...", flush=True)
-    print(f"    👉 If prompted in your browser tab, please click 'Authorize'...", flush=True)
+    print(f"    -> If prompted in your browser tab, please click 'Authorize'...", flush=True)
     start_time = time.time()
     try:
         while CallbackHandler.request_token is None:

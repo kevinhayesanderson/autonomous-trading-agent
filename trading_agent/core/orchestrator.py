@@ -219,7 +219,7 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
         from scripts.kite_auth import load_credentials
         try:
             k_key, _, _ = load_credentials()
-            print(f"    👉 Authorize today's session: https://kite.zerodha.com/connect/login?api_key={k_key}&v=3")
+            print(f"    -> Authorize today's session: https://kite.zerodha.com/connect/login?api_key={k_key}&v=3")
         except Exception:
             pass
         print("    -> Reply with the request_token or redirected URL to commit live Indian orders.")
