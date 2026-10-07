@@ -92,10 +92,14 @@ In addition to recurring monthly accumulation, the bot includes a full **Portfol
 
 You do not need to memorize multiple flags, pick stocks, or write complex code. The system is designed around a strict, intuitive **2-Command UX Contract**:
 
-### 🛡️ Seamless Execution Mandate (Zero Codebase Digging)
+### 🛡️ Seamless Execution Mandate (Zero Actions, Zero Codebase Digging)
 * **DO NOT read source code, inspect internal files, or run git log/diff** when running the trading cycle. `agent.py run` is completely self-contained and handles all audits, screening, and status reporting in a single command.
 * **Exact Python Command**: Always invoke using `.\.venv\Scripts\python.exe agent.py run` directly. Never test python paths, check pip lists, or inspect repo code before executing.
-* **If Zerodha Kite session is expired**: `agent.py run` exits cleanly (code 0) and displays the 1-click authorization link directly in its output. Present it cleanly to the user. When the user provides the token/URL, run `.\.venv\Scripts\python.exe agent.py kite-login --token <TOKEN>`, then re-run `.\.venv\Scripts\python.exe agent.py run` to formulate the live plan.
+* **Seamless Background Browser Auth**:
+  - The user keeps Zerodha Kite and Tickertape logged in in their default browser.
+  - When `agent.py run` starts, if Kite's daily session is expired (6:00 AM IST reset), it **internally hits the default browser with Kite's auth URL and listens on `http://127.0.0.1:8000/` for the redirect**.
+  - Since Kite is already logged in in the browser, Kite redirects immediately to local callback, auto-captures the `request_token`, exchanges it for today's `access_token`, and seamlessly formulates the live plan against verified demat funds.
+  - **Zero user actions required**: The user is never prompted with copy-paste actions or manual URLs during the standard cycle. The agent directly presents the complete synthesized preview.
 
 ```
 Step 1: You say: "run investment agent" (or "run trading agent")

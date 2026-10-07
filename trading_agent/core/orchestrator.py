@@ -73,6 +73,21 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     # 1.2 Indian Broker Audit (Zerodha Kite Connect v3)
     zerodha_margin = get_zerodha_margin()
     zerodha_auth = zerodha_margin.get("authenticated", False)
+
+    # Seamless Auto-Authentication: If expired, automatically trigger browser auth on default browser
+    if not zerodha_auth and not os.environ.get("HEADLESS"):
+        print("\n  --- INDIAN EQUITY WALLET AUDIT (ZERODHA KITE CONNECT v3) ---")
+        print("  * Daily session token expired / pending (6:00 AM IST reset).")
+        print("  * Initiating seamless browser authentication on default browser...")
+        try:
+            from scripts.kite_auth import seamless_authenticate
+            auto_tok = seamless_authenticate(timeout_seconds=20, open_browser=True)
+            if auto_tok:
+                zerodha_margin = get_zerodha_margin()
+                zerodha_auth = zerodha_margin.get("authenticated", False)
+        except Exception as e:
+            print(f"  [!] Seamless browser auth notice: {e}")
+
     zerodha_cash = float(zerodha_margin.get("clear_cash", 0.0))
     zerodha_holdings = get_zerodha_holdings() if zerodha_auth else []
     kite_status = audit_kite_status()

@@ -26,10 +26,14 @@ Strictly adhere to the **Max-2 Interactions Contract** (Zero user choosing, zero
      - **Plan 2 (Indian Equities)**: Formulates Zerodha Kite Delivery (CNC) limit orders with integer share sizing against available Kite cash, -12% Stop-Loss and +35% Take-Profit GTT brackets, and statutory cash buffer. (If daily Kite session is expired, prompts with the 1-click login link).
 * Present the complete synthesized dual plan and await single user execution confirmation.
 
-### 🛡️ Seamless Execution Mandate (Zero Codebase Digging)
+### 🛡️ Seamless Execution Mandate (Zero Actions, Zero Codebase Digging)
 * **DO NOT read source code, inspect internal files, or run git log/diff** when running the trading cycle. `agent.py run` is completely self-contained and handles all audits, screening, and status reporting in a single command.
-* If Zerodha Kite daily session is expired, `agent.py run` provides the 1-click authorization link directly in its output. Present it cleanly to the user.
-* When user provides the token/URL, run `python agent.py kite-login --token <TOKEN>`, then re-run `python agent.py run` to formulate the live plan.
+* **Exact Python Command**: Always invoke using `.\.venv\Scripts\python.exe agent.py run` directly. Never test python paths, check pip lists, or inspect repo code before executing.
+* **Seamless Background Browser Auth**:
+  - The user keeps Zerodha Kite and Tickertape logged in in their default browser.
+  - When `agent.py run` starts, if Kite's daily session is expired (6:00 AM IST reset), it **internally hits the default browser with Kite's auth URL and listens on `http://127.0.0.1:8000/` for the redirect**.
+  - Since Kite is already logged in in the browser, Kite redirects immediately to local callback, auto-captures the `request_token`, exchanges it for today's `access_token`, and seamlessly formulates the live plan against verified demat funds.
+  - **Zero user actions required**: The user is never prompted with copy-paste actions or manual URLs during the standard cycle. The agent directly presents the complete synthesized preview.
 
 ### Interaction 2: User replies "execute"
 * When user prompts: *"execute"* / *"execute the plan"* / *"proceed"* / *"execute confirmed trades"*:

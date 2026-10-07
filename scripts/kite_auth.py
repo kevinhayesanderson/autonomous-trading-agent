@@ -8,6 +8,7 @@ generates the daily access_token, and saves it to persistent memory.
 import os
 import sys
 import json
+import time
 import webbrowser
 from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -44,6 +45,9 @@ def load_credentials():
 
     return api_key, api_secret, redirect_url
 
+class ReusableHTTPServer(HTTPServer):
+    allow_reuse_address = True
+
 class CallbackHandler(BaseHTTPRequestHandler):
     request_token = None
 
@@ -58,10 +62,20 @@ class CallbackHandler(BaseHTTPRequestHandler):
             html = """
             <!DOCTYPE html>
             <html>
-            <head><title>Zerodha Kite Auth Success</title></head>
-            <body style="font-family: -apple-system, sans-serif; text-align: center; padding: 50px; background: #0f172a; color: #f8fafc;">
-                <h1 style="color: #10b981;">&#10004; Zerodha Authentication Successful!</h1>
-                <p style="font-size: 18px;">Access token is being generated. You can close this browser tab.</p>
+            <head>
+                <title>Zerodha Kite Auth Success</title>
+                <script>
+                    setTimeout(() => {
+                        try { window.close(); } catch(e) {}
+                    }, 1500);
+                </script>
+            </head>
+            <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 50px 20px; background: #0f172a; color: #f8fafc;">
+                <div style="max-width: 480px; margin: 40px auto; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    <h1 style="color: #10b981; margin-top: 0;">&#10004; Authentication Successful!</h1>
+                    <p style="font-size: 16px; color: #cbd5e1;">Zerodha Kite Connect session is now active.</p>
+                    <p style="font-size: 14px; color: #94a3b8; margin-top: 20px;">You can close this tab and return to your agent terminal.</p>
+                </div>
             </body>
             </html>
             """
@@ -89,6 +103,79 @@ def save_token(session_data: dict):
             print(f"  * Session token saved to: {path}")
         except Exception as e:
             print(f"  [!] Note: could not write to {path}: {e}")
+
+def seamless_authenticate(timeout_seconds: int = 25, open_browser: bool = True):
+    """
+    Seamless background authentication for Zerodha Kite Connect v3:
+    1. Spins up local callback server on http://127.0.0.1:8000/
+    2. Opens default browser to Kite login URL (where user already has an active Kite session)
+    3. Kite automatically redirects to local callback with request_token
+    4. Automatically exchanges request_token for access_token, saves to .kite_token.json, and returns token.
+    Returns access_token on success, or None on timeout/failure.
+    """
+    try:
+        api_key, api_secret, redirect_url = load_credentials()
+    except Exception as e:
+        print(f"  [!] Kite credentials missing: {e}")
+        return None
+
+    kite = KiteConnect(api_key=api_key)
+    login_url = kite.login_url()
+
+    parsed = urlparse(redirect_url)
+    port = parsed.port or 8000
+    host = parsed.hostname or "127.0.0.1"
+
+    CallbackHandler.request_token = None
+
+    server = None
+    try:
+        server = ReusableHTTPServer((host, port), CallbackHandler)
+        server.timeout = 1.0  # 1 second poll tick
+    except Exception as e:
+        print(f"  [!] Could not start local callback server on {host}:{port}: {e}")
+        return None
+
+    if open_browser and not os.environ.get("HEADLESS"):
+        print(f"  * Hitting default browser with Zerodha Kite authorization URL...")
+        print(f"    -> {login_url}")
+        try:
+            webbrowser.open(login_url)
+        except Exception as e:
+            print(f"  [!] Could not launch browser automatically: {e}")
+
+    print(f"  * Listening on http://{host}:{port}/ for callback (timeout: {timeout_seconds}s)...")
+    start_time = time.time()
+    try:
+        while CallbackHandler.request_token is None:
+            if time.time() - start_time > timeout_seconds:
+                print(f"  [!] Seamless browser authorization timed out after {timeout_seconds}s.")
+                break
+            server.handle_request()
+    finally:
+        if server:
+            server.server_close()
+
+    req_token = CallbackHandler.request_token
+    if not req_token:
+        return None
+
+    print(f"  [+] Captured request_token seamlessly: {req_token[:6]}...{req_token[-4:]}")
+    try:
+        session = kite.generate_session(req_token, api_secret=api_secret)
+        access_token = session.get("access_token")
+        user_name = session.get("user_name", "Zerodha User")
+        user_id = session.get("user_id", "")
+        print(f"  [SUCCESS] Authenticated as: {user_name} ({user_id})")
+        save_token(session)
+        kite.set_access_token(access_token)
+        margins = kite.margins(segment="equity")
+        cash = margins.get("available", {}).get("cash", 0.0)
+        print(f"  * Verified Available Cash in Zerodha: Rs {cash:,.2f} INR")
+        return access_token
+    except Exception as e:
+        print(f"  [!] Failed to exchange request_token: {e}")
+        return None
 
 def authenticate(direct_token: str = None):
     api_key, api_secret, redirect_url = load_credentials()
@@ -142,76 +229,23 @@ def authenticate(direct_token: str = None):
             print(f"[ERROR] Failed to exchange request_token for access_token: {e}")
             sys.exit(1)
 
-    parsed = urlparse(redirect_url)
-    port = parsed.port or 8000
-    host = parsed.hostname or "127.0.0.1"
+    # First attempt seamless browser authorization
+    tok = seamless_authenticate(timeout_seconds=30, open_browser=True)
+    if tok:
+        return tok
 
-    print("=" * 80)
-    print(" [ZERODHA KITE CONNECT v3 AUTHENTICATION]")
-    print("=" * 80)
-    print(f"  * API Key:         {api_key[:4]}...{api_key[-4:]}")
-    print(f"  * Callback URL:    {redirect_url}")
-    print(f"  * Login URL:       {login_url}")
-    print("\nOpening browser to authorize with Zerodha Kite...")
+    # If seamless failed, fallback to interactive prompt if in interactive tty
+    if sys.stdin.isatty():
+        print("\n  -> If browser redirect failed, paste the full redirected URL or request_token below:")
+        try:
+            user_input = input("Enter request_token or full redirect URL: ").strip()
+            if user_input:
+                return authenticate(direct_token=user_input)
+        except Exception:
+            pass
 
-    try:
-        webbrowser.open(login_url)
-    except Exception as e:
-        print(f"  [!] Could not open browser automatically: {e}")
-        print(f"  -> Please open this URL manually: {login_url}")
-
-    server = None
-    try:
-        server = HTTPServer((host, port), CallbackHandler)
-        server.timeout = 120  # 2 minute timeout
-        print(f"Waiting for Zerodha callback on http://{host}:{port}/ ...")
-        while CallbackHandler.request_token is None:
-            server.handle_request()
-    except Exception as e:
-        print(f"  [!] Local server notice: {e}")
-        print("  -> If browser redirect failed, paste the full redirected URL or request_token below:")
-        user_input = input("Enter request_token or full redirect URL: ").strip()
-        if "request_token=" in user_input:
-            query = urlparse(user_input).query
-            params = parse_qs(query)
-            CallbackHandler.request_token = params.get("request_token", [None])[0]
-        else:
-            CallbackHandler.request_token = user_input
-    finally:
-        if server:
-            server.server_close()
-
-    req_token = CallbackHandler.request_token
-    if not req_token:
-        print("[ERROR] Failed to obtain request_token.")
-        sys.exit(1)
-
-    print(f"\n[+] Obtained request_token: {req_token[:6]}...{req_token[-4:]}")
-    print("Generating persistent access token session...")
-
-    try:
-        session = kite.generate_session(req_token, api_secret=api_secret)
-        access_token = session.get("access_token")
-        user_name = session.get("user_name", "Zerodha User")
-        user_id = session.get("user_id", "")
-        
-        print("\n" + "=" * 80)
-        print(f" [SUCCESS] Authenticated as: {user_name} ({user_id})")
-        print(f" Access Token: {access_token[:6]}...{access_token[-4:]}")
-        print("=" * 80)
-
-        save_token(session)
-
-        # Test margins
-        kite.set_access_token(access_token)
-        margins = kite.margins(segment="equity")
-        cash = margins.get("available", {}).get("cash", 0.0)
-        print(f"  * Verified Available Cash in Zerodha: Rs {cash:,.2f} INR")
-
-        return access_token
-    except Exception as e:
-        print(f"[ERROR] Failed to exchange request_token for access_token: {e}")
-        sys.exit(1)
+    print("[ERROR] Failed to obtain request_token.")
+    sys.exit(1)
 
 if __name__ == "__main__":
     authenticate()

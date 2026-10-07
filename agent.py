@@ -234,9 +234,12 @@ def cmd_kite_status(args):
 
 def cmd_kite_login(args):
     """Initiates OAuth 2.0 login flow for Zerodha Kite Connect v3."""
-    from scripts.kite_auth import authenticate
+    from scripts.kite_auth import authenticate, seamless_authenticate
     direct_token = getattr(args, "token", None) or getattr(args, "url", None)
-    authenticate(direct_token=direct_token)
+    if direct_token:
+        authenticate(direct_token=direct_token)
+    else:
+        seamless_authenticate(timeout_seconds=30, open_browser=True)
 
 def cmd_tt_login(args):
     """Initiates OAuth 2.1 PKCE interactive login flow for Tickertape PRO."""
@@ -295,8 +298,11 @@ def cmd_auth(args):
             print(f"  [SUCCESS] Zerodha Kite Connect session is already ACTIVE ({current_status.get('user_name', '')}).")
         else:
             try:
-                from scripts.kite_auth import authenticate
-                authenticate(direct_token=direct_token)
+                from scripts.kite_auth import authenticate, seamless_authenticate
+                if direct_token:
+                    authenticate(direct_token=direct_token)
+                else:
+                    seamless_authenticate(timeout_seconds=30, open_browser=True)
                 fresh_status = audit_kite_status()
                 kite_ok = fresh_status.get("authenticated", False)
             except Exception as e:
