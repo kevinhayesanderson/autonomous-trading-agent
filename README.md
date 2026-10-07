@@ -1,278 +1,184 @@
-# 🤖 Autonomous Quantitative Trading Agent (AQTA)
+# Autonomous Quantitative Trading Agent (AQTA)
 
 <p align="center">
-  <img src="assets/social_preview.jpg" alt="Autonomous Quantitative Trading Agent (AQTA) Social Preview" width="100%" />
+  <img src="assets/social_preview.jpg" alt="Autonomous Quantitative Trading Agent (AQTA)" width="100%" />
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.10+](https://img.shields.io/badge/python-3.10+-brightgreen.svg)](https://www.python.org/)
 [![Model Context Protocol: MCP 2.x](https://img.shields.io/badge/MCP-2.x%20FastMCP%20Ready-6f42c1.svg)](https://modelcontextprotocol.io/)
 [![M8ven Score](https://m8ven.ai/badge/mcp/kevinhayesanderson/autonomous-trading-agent)](https://m8ven.ai/mcp/kevinhayesanderson/autonomous-trading-agent?s=readme)
-[![Pydantic v2 Grammar](https://img.shields.io/badge/Schemas-Pydantic%20v2-e92063.svg)](https://docs.pydantic.dev/)
+[![Pydantic v2](https://img.shields.io/badge/Schemas-Pydantic%20v2-e92063.svg)](https://docs.pydantic.dev/)
 [![Security: Bandit SAST](https://img.shields.io/badge/Security-0%20Bandit%20Issues-brightgreen.svg)](docs/security_audit_report.md)
 [![Dependencies: 0 CVEs](https://img.shields.io/badge/Dependencies-0%20Known%20CVEs-brightgreen.svg)](docs/security_audit_report.md)
-[![Agentic Evals: 100%](https://img.shields.io/badge/Agentic%20Evals-7%2F7%20Passing-success.svg)]()
-[![System Verification: 100%](https://img.shields.io/badge/Self--Test-7%2F7%20Passing-success.svg)]()
+[![Agentic Evals](https://img.shields.io/badge/Agentic%20Evals-7%2F7%20Passing-success.svg)]()
+[![System Verification](https://img.shields.io/badge/Self--Test-7%2F7%20Passing-success.svg)]()
 
-An institutional-grade, multi-agent quantitative trading system engineered for **recurring capital allocation across dual global markets**:
-1. **US Equities**: High-beta semiconductor and technology monopolies via **Tickertape / DriveWealth** (live) and **Alpaca** (paper shadow sandbox).
-2. **Indian Equities**: Secular capex, industrial manufacturing, and power infrastructure compounders via **Zerodha Kite Connect v3** (live delivery cash / GTT orders) and **Tickertape PRO India**.
+Institutional-grade, multi-agent quantitative trading system engineered for **systematic capital allocation across dual global markets**:
+1. **US Equities**: High-beta semiconductor and technology infrastructure compounders via **Tickertape / DriveWealth** (live fractional execution) and **Alpaca** (paper shadow sandbox).
+2. **Indian Equities**: Secular capex, industrial manufacturing, and power infrastructure leaders via **Zerodha Kite Connect v3** (live delivery cash CNC & GTT brackets) and **Tickertape PRO India**.
 
-Equipped with **test-time compute (extended thinking traces)**, **Pydantic v2 structured schemas**, an **official MCP 2.x server**, and a **closed recursive feedback loop**, the agent audits historical portfolio performance, runs an adversarial committee debate, calibrates factor weights dynamically, and synchronizes memory and state to Git—ensuring **complete client-agnostic operation** across Antigravity, Claude Desktop, Cursor, Windsurf, headless cloud servers, and CI/CD pipelines.
-
-> 📚 **Core Documentation & Playbooks**:
-> * **[Multi-Agent Adversarial System Review](docs/adversarial_review.md)** — Comprehensive 6-specialist forensic audit across AI, systems, quant, execution, fiduciary, and black swan resilience (Score: **9.7 / 10**).
-> * **[Security & Vulnerability Audit Report](docs/security_audit_report.md)** — SAST, SCA, and privacy audit (0 CVEs, 0 High/Medium Bandit issues).
-> * **[$1,000 USD Capital Deployment Playbook](docs/1000_usd_execution_playbook.md)** — Staged execution, RBI LRS banking, and 50% wallet-drain navigation.
-> * **[Master Agent Operating Standard](AGENTS.md)** — Universal specification for AI coding agents and MCP clients.
-> * **[Monthly Execution Workbook](monthly_execution_workbook.md)** — Step-by-step operational runbook for monthly rebalancing windows.
+AQTA features test-time compute with extended reasoning traces, strict Pydantic v2 grammar-enforced schemas, native Model Context Protocol (MCP 2.x) integration, and an immutable Git-synced memory ledger.
 
 ---
 
-## ⚡ The Max-2 Interactions Workflow (Human-in-the-Loop)
+## Core Documentation
+* **[Adversarial System Review](docs/adversarial_review.md)**: Forensic audit across AI decision-making, quantitative modeling, execution resilience, and risk collars (Score: **9.7 / 10**).
+* **[Security & Vulnerability Audit](docs/security_audit_report.md)**: SAST, SCA, and privacy audit report (0 CVEs, 0 Bandit issues).
+* **[Capital Deployment Playbook](docs/1000_usd_execution_playbook.md)**: Staged capital deployment, RBI LRS banking, and wallet-drain safety.
+* **[Master Agent Operating Standard (AGENTS.md)](AGENTS.md)**: Specification for AI coding agents and MCP clients.
+* **[Monthly Execution Workbook](monthly_execution_workbook.md)**: Operational runbook for recurring allocation windows.
 
-You never need to choose stocks, fiddle with complex CLI flags, or run ad-hoc scripts. The entire system adheres to a strict, intuitive **2-Interaction UX Contract**:
+---
+
+## Execution Workflow (Max-2 Interactions Contract)
+
+AQTA follows an intuitive two-step human-in-the-loop interaction model with zero manual parameter tuning:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Investor (User)
-    participant Agent as Autonomous Investment Agent
-    participant US_Broker as US Broker (Tickertape / Alpaca)
-    participant IN_Broker as IN Broker (Zerodha Kite Connect v3)
-    participant Ledger as Git Ledger & Trade Journal
+    actor User as Investor
+    participant Agent as Autonomous Trading Agent
+    participant US as US Broker (Tickertape / Alpaca)
+    participant IN as Indian Broker (Zerodha Kite)
+    participant Git as Git Ledger & Trade Journal
 
-    Note over User, Agent: INTERACTION 1: AUDIT & SYNTHESIS
+    Note over User, Agent: STEP 1: AUDIT & SYNTHESIZE
     User->>Agent: "run investment agent"
-    Agent->>US_Broker: Real-time Wallet & Holdings Audit
-    Agent->>IN_Broker: Clear Cash Margin & Demat Holdings Audit
-    Agent->>Agent: Phase 0 Adversarial Retrospectives & Factor Tuning
-    Agent->>Agent: Whole-Market Screening from Scratch (Zero Hardcoding)
-    Agent->>Agent: Multi-Agent Specialist Committee Deliberations (<thinking> traces)
-    Agent->>Agent: Synthesize Dual-Market Allocation Plan (Zero Mutations)
-    Agent-->>User: Present Complete Synthesized Trade Plan (US Basket + Zerodha Kite Orders)
+    Agent->>US: Real-time wallet & holdings audit (LRS transit verification)
+    Agent->>IN: Clear cash margin & demat holdings audit
+    Agent->>Agent: Phase 0 retrospective debate & dynamic factor calibration
+    Agent->>Agent: Unbiased whole-market quantitative screening from scratch
+    Agent->>Agent: Multi-agent committee deliberations with extended thinking
+    Agent->>Agent: Synthesize non-mutating dual-market allocation plan
+    Agent-->>User: Complete synthesized trade plan presented for review
 
-    Note over User, Agent: INTERACTION 2: LIVE EXECUTION & COMMIT
+    Note over User, Agent: STEP 2: EXECUTE & COMMIT
     User->>Agent: "execute"
-    Agent->>US_Broker: Execute US Fractional Orders (Tickertape / Alpaca)
-    Agent->>IN_Broker: Route Zerodha Delivery CNC Orders (-12% SL, +35% TP GTT)
-    Agent->>Ledger: Append to memory/trade_journal.jsonl
-    Agent->>US_Broker: Sync Tickertape PRO Master Watchlist
-    Agent->>Ledger: Auto-Commit & Push State to Git origin/main
-    Agent-->>User: Dual-Market Execution Complete & Confirmed!
+    Agent->>US: Execute fractional USD orders (50% wallet-drain compliant)
+    Agent->>IN: Route Zerodha CNC limit orders with -12% SL & +35% TP GTT brackets
+    Agent->>Git: Append immutable records to memory/trade_journal.jsonl
+    Agent->>US: Synchronize Tickertape PRO Master Watchlist
+    Agent->>Git: Auto-commit and push updated state to origin/main
+    Agent-->>User: Execution complete and verified
 ```
 
-1. **Step 1: You say**: `"run investment agent"`
-   * Autonomous execution: `python agent.py run`
-   * The agent audits live balances across both wallets, runs adversarial retrospectives, executes dynamic whole-market screening from scratch without carryover or blueprints, deliberates through specialist personas, and presents an objective, decision-free allocation plan.
-2. **Step 2: You say**: `"execute"`
-   * Autonomous execution: `python agent.py run --execute`
-   * The agent executes confirmed orders across both brokers, logs immutable audit records, updates watchlists, and commits the state ledger to Git.
+* **Interaction 1: Preview**: `python agent.py run`  
+  Audits live balances across brokers, screens both markets from scratch, evaluates candidates via specialist agents, and presents an objective allocation plan.
+* **Interaction 2: Execute**: `python agent.py run --execute`  
+  Executes live orders across both brokerages, attaches GTT risk collars, logs trade journals, updates watchlists, and synchronizes memory state to remote Git.
 
 ---
 
-## 🏛️ System Architecture & Dual-Market Topology
+## System Architecture
 
-```
-┌───────────────────────────────────────────────────────────────────────────────────────────┐
-│                    AUTONOMOUS QUANTITATIVE DUAL-MARKET ARCHITECTURE                       │
-├─────────────────────────────────────────────┬─────────────────────────────────────────────┤
-│         US MARKET (TICKERTAPE / ALPACA)     │            INDIAN MARKET (ZERODHA KITE)     │
-│  • Live Broker: Tickertape / DriveWealth    │  • Live Broker: Zerodha Kite Connect v3     │
-│  • Paper Broker: Alpaca ($100K Sandbox)     │  • Segment: Delivery Cash (CNC) / NSE & BSE │
-│  • Universe: High-Beta Tech Monopolies      │  • Universe: Secular Capex & Power Leaders  │
-│  • Fractional USD Notional Sizing           │  • Integer Share Sizing with Cash Buffer    │
-│  • Funded via RBI LRS (₹ INR -> $ USD)      │  • Automated Orders & 1-Year GTT Brackets   │
-├─────────────────────────────────────────────┴─────────────────────────────────────────────┤
-│                    MODEL CONTEXT PROTOCOL (MCP 2.x) SERVER INTERFACE                      │
-│        • server/mcp_server.py: Standard JSON-RPC 2.0 MCPServer (stdio / SSE transport)    │
-│        • 9 Native Tools: Status, Screener, Deliberate, Preview, Exec, Drain, Tests, Evals │
-│        • 3 Live Resources: resource://portfolio/{status, rules, memory}                   │
-│        • Interactive Prompts: prompt://committee_deliberation(ticker)                     │
-│        • Zero-Config Plug-and-Play for Claude Desktop, Cursor, Antigravity, and Windsurf  │
-├───────────────────────────────────────────────────────────────────────────────────────────┤
-│                2026 SOTA MULTI-AGENT DELIBERATION & REASONING ENGINE                      │
-│        • trading_agent/core/deliberation.py: Committee debate with <thinking> traces     │
-│        • trading_agent/core/schemas.py: Strict Pydantic v2 grammar-enforced schemas       │
-│        • Specialists: Fundamental Analyst, Technical Analyst, Fiduciary Risk Veto        │
-│        • Hard Boundary: Probabilistic LLM deliberation separated from deterministic math  │
-├───────────────────────────────────────────────────────────────────────────────────────────┤
-│                               PERSISTENT AGENT MEMORY STORE                               │
-│        • memory/trade_journal.jsonl: Immutable log of past executions (Locally isolated)  │
-│        • memory/factor_weights.json: Calibrated quantitative weights & hard invariants    │
-│        • memory/retrospective_log.jsonl: Automated adversarial committee reviews          │
-│        • memory/lessons_learned.md: Synthesized post-mortem repository                    │
-│        • memory/evidence_ledger.jsonl: Mathematical audit trail of cycle scores           │
-├───────────────────────────────────────────────────────────────────────────────────────────┤
-│                                   7-PHASE EXECUTION ENGINE                                │
-│   [Phase 0] Continuous Adversarial Retrospective & Recursive Factor Weight Tuning         │
-│   [Phase 1] Dual-Broker Real-Time Wallet & Liquidity Audit (LRS Delay Tracker)            │
-│   [Phase 2] Whole-Market Quantitative Screening from Scratch (Zero Blueprints)            │
-│   [Phase 3] Multi-Agent Committee Consensus (Fundamental, Technical, Risk Veto)          │
-│   [Phase 4] Anti-Churn Rebalancing Engine (60-Day Tenure Lock & Turnover Collar)          │
-│   [Phase 5] Pre-Trade Flag Verification & Resilient Execution (Auto-Requote on Expiry)    │
-│   [Phase 6] Zero-Limbo Capital Controller (Automatic Leg 2 Residual Absorption)           │
-│   [Phase 7] Client-Agnostic Git Sync (Auto-Commit & Push Memory/State to Remote)          │
-└───────────────────────────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph PerceptionLayer["1. Perception & Market Ingestion"]
+        TT["Tickertape PRO Screener\n(US & IN Universes)"]
+        ZT["Zerodha Kite Connect v3\n(Live LTP & Demat Margins)"]
+        AV["Alpha Vantage\n(RSI-14 & Moving Averages)"]
+        LRS["RBI LRS Controller\n(In-Flight Remittance Tracker)"]
+    end
+
+    subgraph ReasoningLayer["2. Multi-Agent Committee Consensus"]
+        FA["Fundamental Analyst Agent\n(Moat, Margin Floor, Forward EPS, Sponsorship)"]
+        TA["Technical Analyst Agent\n(6M/1M Momentum, SMA200, Weekly RSI)"]
+        RM["Fiduciary Risk Manager\n(Beta Collar, Earnings Blackout, Tenure Lock - ABSOLUTE VETO)"]
+        PM["Portfolio Manager Agent\n(Cross-Sectional Z-Score Synthesis & Sizing)"]
+    end
+
+    subgraph ExecutionLayer["3. Execution & Safety Layer"]
+        WD["50% Wallet-Drain Safety Regulator"]
+        ZL["Zero-Limbo Residual Absorption Engine"]
+        SG["Bidirectional Slippage Guards"]
+        EX_US["Tickertape / DriveWealth (Fractional US)"]
+        EX_IN["Zerodha Kite Connect (CNC + GTT Brackets)"]
+    end
+
+    subgraph MemoryLayer["4. Persistent Memory & Audit Trail"]
+        TJ["Trade Journal (memory/trade_journal.jsonl)"]
+        FW["Factor Weights (memory/factor_weights.json)"]
+        RL["Retrospective Logs (memory/retrospective_log.jsonl)"]
+        GS["Git State Sync (Remote Origin Main)"]
+    end
+
+    PerceptionLayer --> ReasoningLayer
+    FA & TA & RM --> PM
+    PM --> ExecutionLayer
+    WD & ZL & SG --> EX_US & EX_IN
+    ExecutionLayer --> MemoryLayer
 ```
 
 ---
 
-## 🎯 The Fiduciary Mandate: High-Return Compounding Without Ruin Risk
+## Fiduciary Mandate & Risk Collars
 
-> **Guiding Principle**: Every rupee or dollar allocated represents hard-earned salary and a long-term gateway out of poverty. High return is achieved by owning the most dominant, cash-generating technology monopolies on earth and the highest-conviction domestic capex compounders—**we are never reckless**. The system strictly blocks speculative lottery tickets, cash-burning biotechs, or post-IPO hype traps.
+Every dollar and rupee allocated represents hard-earned salary. The system concentrates capital strictly into dominant technology and industrial monopolies, enforcing absolute risk boundaries:
 
-| Fiduciary Guardrail | Invariant / Collar | Rationale & Protection |
+| Fiduciary Guardrail | Invariant Collar | Engineering Rationale & Protection |
 | :--- | :---: | :--- |
-| **Strict Positive Margin Floor** | $\text{Net Margin} > 0.0\%$ | Eliminates cash-burners. Capital only funds profitable businesses. |
-| **Institutional Market Cap Floor** | $\ge \$20\text{B (US)} / \ge ₹2,000\text{Cr (IN)}$ | Invests strictly in liquid titans with deep economic moats. |
-| **Bounded High-Beta Collar** | $1.40 \le \beta \le 2.80$ | High market sensitivity for alpha, hard-capped to eliminate erratic speculation. |
-| **Anti-Falling Knife Filter** | $\text{Price} \ge \text{SMA}_{200}$ | Disqualifies assets in secular structural downtrends. |
+| **Positive Net Margin Floor** | $\text{Net Margin} > 0.0\%$ | Eliminates cash burners. Capital only funds profitable enterprises. |
+| **Institutional Market Cap Floor** | $\ge \$20\text{B (US)} / \ge ₹2,000\text{Cr (IN)}$ | Eliminates illiquid penny stocks, micro-caps, and post-IPO traps. |
+| **Bounded High-Beta Collar** | $1.40 \le \beta \le 2.80$ | High market sensitivity for alpha, hard-capped to eliminate speculative volatility. |
+| **Anti-Falling Knife Baseline** | $\text{Price} \ge \text{SMA}_{200}$ | Disqualifies assets in secular structural downtrends. |
 | **Concentrated Conviction Cap** | $\le 3\text{ Active Assets per Market}$ | Maximum 2 new assets per cycle, capped at 3 total holdings to prevent fee drag. |
-| **60-Day Anti-Churn Tenure Lock** | $\text{Tenure} \ge 60\text{ Days}$ | Protects recent buys from premature churn, saving 1.17% fees and 31.2% Indian STCG. |
-| **48-Hour Earnings Proximity** | $\text{Penalty}: -25\text{ Pts}$ | Dynamic deduction if earnings report within $\pm 48\text{h}$ (prevents binary gap down). |
-| **50% Wallet-Drain Regulator** | $\text{Tranche} \le 0.50 \times \text{Cash}$ | Complies with Tickertape's 60-min safety limit (`WALLET_DRAIN_LIMIT_EXCEEDED`). |
-| **Zero-Limbo Capital Absorption** | $\text{Stranded Cash} \to \text{Fill}$ | If an order leg fails, residual funds automatically top up the filled leg. 0% idle cash. |
-| **Bidirectional Slippage Guards** | $\text{BUY} \le \text{Ceiling}, \text{SELL} \ge \text{Floor}$ | Strict price verification prevents execution beyond authorized slippage boundaries. |
+| **60-Day Anti-Churn Tenure Lock** | $\text{Tenure} \ge 60\text{ Days}$ | Protects recent holdings from momentum churn, saving 1.17% fees and 31.2% Indian STCG. |
+| **48-Hour Earnings Proximity** | $\text{Penalty}: -25\text{ Points}$ | Dynamic score reduction if quarterly earnings report within $\pm 48\text{h}$ (avoids binary gap-downs). |
+| **50% Wallet-Drain Regulator** | $\text{Tranche} \le 0.49 \times \text{Cash}$ | Complies with DriveWealth's rolling 60-min safety rule (`WALLET_DRAIN_LIMIT_EXCEEDED`). |
+| **Zero-Limbo Capital Controller** | $\text{Residual Cash} \to \text{Fill}$ | If an order leg fails, residual funds automatically absorb into primary positions. |
+| **Bidirectional Slippage Guards** | $\text{BUY} \le \text{Ceiling}, \text{SELL} \ge \text{Floor}$ | Enforces limit price execution boundaries against market spreads. |
 
 ---
 
-## 🛡️ Fiduciary Large-Capital Allocation & In-Flight Transit Safety
+## Large-Capital Allocation & Banking Transit Safety
 
-When deploying substantial capital infusions (such as recurring salary allocations of **₹1,00,000 INR / ~$1,028 USD** via the RBI Liberalised Remittance Scheme), the system activates a specialized **5-Tier Fiduciary Capital Preservation Protocol**:
+Substantial capital injections (such as recurring salary allocations of **₹1,00,000 INR / ~$1,028 USD** via the RBI Liberalised Remittance Scheme) are governed by a **5-Tier Capital Safety Protocol**:
 
-```mermaid
-flowchart TD
-    subgraph InflowLayer["1. Capital Inflow & Banking Transit"]
-        HDFC["Bank Transfer (e.g., HDFC Bank LRS Outward Remittance)"]
-        FX["Live FX Clearing (e.g., ₹97.07 - ₹97.20 / USD)"]
-        TT_IN["Tickertape Fund Gateway Tracker\n(us_account_fund_history_read)"]
-        HDFC --> FX --> TT_IN
-    end
-
-    subgraph SafetyGate["2. Zero-Limbo Gatekeeper & Safety Collars"]
-        TRANSIT{"Funds In Transit?\n(CAPITAL_IN_FLIGHT)"}
-        LOCK["Halt Premature Execution\nLock Unsettled Funds\nAudit Clearing ETAs"]
-        SETTLED["Funds Settled in Broker Cash\n(Zero Limbo Confirmed)"]
-        TRANSIT -- Yes --> LOCK
-        TRANSIT -- No --> SETTLED
-    end
-
-    subgraph SizingLayer["3. Sizing & Anti-Churn Execution"]
-        TENURE{"Active Assets < 60 Days?\n(Tenure Lock Active)"}
-        LOCK_HOLDINGS["Protect Active Leaders (e.g. ASML, TSM, MRVL)\nEliminate 1.17% Fees & 31.2% STCG Tax"]
-        DRAIN_GUARD["50% Wallet-Drain Safety Regulator\n(Tranches <= 0.49 * Settled Cash)"]
-        PROPORTIONAL["Proportional Top-Up into Retained Monopolies\n(e.g., ~$340 per Conviction Titan)"]
-        TENURE -- Yes --> LOCK_HOLDINGS --> DRAIN_GUARD --> PROPORTIONAL
-    end
-
-    subgraph PostExecLayer["4. Zero-Limbo Absorption & Git Sync"]
-        ABSORB["Zero-Limbo Absorption: Stranded Leg 2 Cash -> Leg 1 Leader"]
-        GIT_SYNC["Commit Immutable Trade Record to memory/trade_journal.jsonl & Push to Git"]
-        PROPORTIONAL --> ABSORB --> GIT_SYNC
-    end
-
-    InflowLayer --> SafetyGate
-    SafetyGate --> SizingLayer
-```
-
-### The 5 Capital Safety Invariants:
-1. **Live RBI LRS Remittance Tracker (`us_account_fund_history_read`)**:
-   Tracks in-flight bank remittances with exact transaction IDs, foreign exchange conversion rates, and settlement dates (e.g. T+1/T+2 clearing) directly from the broker's banking gateway.
-2. **Zero-Limbo Pre-Trade Gatekeeper (`CAPITAL_IN_FLIGHT`)**:
-   Freezes automated trade execution while funds are in transit. Prevents premature orders, negative margin violations, or currency slippage. If an order leg fails during live execution, unspent funds are immediately absorbed into primary positions so **0% cash sits stranded in limbo**.
-3. **50% Wallet-Drain Safety Regulator (`WALLET_DRAIN_LIMIT_EXCEEDED`)**:
-   Enforces DriveWealth / Tickertape's rolling 60-minute wallet protection by automatically sizing order tranches to $\le 49\%$ of available settled cash or using recursive micro-drains (`python agent.py drain`), mathematically preventing order rejection.
-4. **60-Day Anti-Churn Tenure Lock (Tax & Fee Shield)**:
-   Active holdings held for $< 60$ days cannot be liquidated for momentum churn. This preserves secular compound compounding, avoids **1.17% round-trip brokerage friction**, and completely shields against **31.2% Indian Short-Term Capital Gains tax on US equities** (and 20% on domestic equities).
-5. **Dynamic Leader Capital Allocation**:
-   When the portfolio is at its $\le 3$ holding capacity and all assets are tenure-locked, fresh salary inflows dynamically top up existing high-conviction leaders proportionally rather than diluting into inferior secondary assets.
+1. **Live LRS Remittance Tracker (`us_account_fund_history_read`)**: Tracks banking reference IDs, foreign exchange rates (e.g. ₹97.07–₹97.20 / USD), transfer timestamps, and clearing deadlines directly from the broker gateway.
+2. **Zero-Limbo Pre-Trade Gatekeeper (`CAPITAL_IN_FLIGHT`)**: Freezes automated order routing while funds are in banking transit. Prevents premature execution against uncleared funds or negative margin calls.
+3. **50% Wallet-Drain Safety Regulator**: Automatically divides large deployments into compliant tranches ($\le 49\%$) or recursive micro-drains (`python agent.py drain`), mathematically preventing order rejection.
+4. **60-Day Anti-Churn Tenure Shield**: Active holdings held for $< 60$ days cannot be liquidated to fund new rotations. Preserves compounding, saves **1.17% round-trip brokerage friction**, and avoids **31.2% Indian Short-Term Capital Gains tax on US equities** (20% on domestic equities).
+5. **Dynamic Conviction Top-Up**: When the portfolio is at holding capacity ($\le 3$ assets) and all positions are tenure-locked, fresh capital systematically tops up retained leaders proportionally rather than diluting into secondary names.
 
 ---
 
-## 🔬 Institutional Multi-Factor Intelligence Stack (Beyond Basic TA/FA)
+## Institutional Multi-Factor Intelligence Stack
 
-A common question is: *Are we just doing basic technical and fundamental analysis alone? Do we track hedge funds or private-mover rumors?*
+AQTA intentionally avoids noisy day-to-day hedge fund rumors, private-mover Discord/Telegram leaks, and retail options flow—all of which generate tax-heavy churn, transaction friction, and ruin risk. The system operates on institutional consensus forecasts, smart-money float sponsorship, and exchange regulatory surveillance:
 
-**The short answer**: AQTA completely rejects noisy day-to-day hedge fund chatter, private-mover Discord/Telegram rumors, and retail options flow—which create taxable churn, fee bleed, and high ruin risk. Instead, AQTA employs an **Institutional Multi-Factor Intelligence Stack** grounded in forward-looking consensus forecasts, smart-money float sponsorship, forensic governance, and exchange regulatory surveillance.
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                     AQTA INSTITUTIONAL MULTI-FACTOR INTELLIGENCE STACK                          │
-├───────────────────────────────────┬─────────────────────────────────────────────────────────────┤
-│ Intelligence Layer                │ Forensic Metric / Invariant Source & Rationale              │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 1. Forward-Looking Wall Street    │ • forecastEpsGrowthPercent: Forward 12M consensus revisions │
-│    Estimates & Revisions          │ • Upward earnings revision momentum vs static trailing data │
-│                                   │ • Normalizes outlier biases with a +250% ceiling            │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 2. Institutional Equity Research  │ • analystBuyPercent: Institutional research buy consensus   │
-│    Consensus & Target Upside      │ • analystTargetPrice: 12-month Wall Street consensus target │
-│                                   │ • Strict hurdle: Target upside > 0% & Buy Consensus >= 65%  │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 3. Smart-Money Float Sponsorship  │ • instown: Institutional Ownership % of float               │
-│    (Tier-1 Asset Backing)         │ • Sponshorship by BlackRock, Vanguard, sovereign funds, DIIs│
-│                                   │ • Disqualifies un-sponsored retail floats & penny stocks    │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 4. Forensic Governance & Balance  │ • Promoter Pledge Forensics: Disqualifies pledge traps      │
-│    Sheet Stress Testing           │ • Debt-to-Equity Hard Ceiling: Debt/Equity <= 3.0           │
-│                                   │ • Operating Cash Flow & Net Margin > 0.0% (Zero Burners)    │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 5. Regulatory Surveillance        │ • SEBI ASM (Additional Surveillance Measure) screening      │
-│    Defense (SEBI ASM / GSM)       │ • SEBI GSM (Graded Surveillance Measure) screening          │
-│                                   │ • Instant VETO on any exchange surveillance intervention    │
-├───────────────────────────────────┼─────────────────────────────────────────────────────────────┤
-│ 6. Noise & Churn Immunity         │ • Immune to private-mover leaks, tipsters, & options hype   │
-│    (Anti-Ruin Long-Term Horizon)  │ • Eliminates 31.2% STCG tax drag and high-frequency friction│
-└───────────────────────────────────┴─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🧠 SOTA Multi-Agent Deliberation & Extended Thinking
-
-The reasoning engine implements the NeurIPS AgenticTrading multi-agent committee consensus framework with test-time reasoning traces and strict Pydantic v2 schemas:
-
-```mermaid
-flowchart TD
-    subgraph SpecialistLayer["Specialist Agent Panel (prompts/)"]
-        FA["Fundamental Analyst Agent (prompts/fundamental_analyst.md)\n• Economic Moat Score (1-10)\n• Net Margin Floor (>0% & Positive Cash Flow)\n• Wall Street Forward EPS Growth Revisions\n• Institutional Sponsorship (instown)\n• Promoter Governance & Pledge Forensics"]
-        TA["Technical Analyst Agent (prompts/technical_analyst.md)\n• 6M & 1M Momentum Velocity\n• Weekly RSI-14 Boundary (35 / 75 Collars)\n• 200-Day SMA Trend Integrity\n• Institutional Accumulation vs Churn"]
-        RM["Fiduciary Risk Manager (prompts/risk_manager.md)\n• Bounded Beta Collar (1.40 - 2.80)\n• 48h Earnings Blackout Window (-25 pts)\n• 60d Anti-Churn Tenure Lock\n• SEBI ASM/GSM Surveillance Defense\n• 50% Wallet-Drain Safety Regulator\n• ABSOLUTE VETO POWER"]
-        PM["Portfolio Manager Agent (prompts/portfolio_manager.md)\n• Cross-Sectional Z-Score Q-Synthesis\n• Concentrated Portfolio Cap (<= 3 Holdings)\n• Large-Capital Proportional Sizing\n• Zero-Limbo Capital Absorption\n• Git State Ledger Synchronization"]
-    end
-
-    subgraph DeliberationLayer["Test-Time Compute & Deliberation Engine"]
-        COT["<thinking> Extended Reasoning Trace </thinking>\n• Scenario Stress Testing\n• Downside Ruin Analysis\n• Asymmetric Upside Conviction"]
-        QUORUM{"Committee Quorum Check\n• Any VETO? -> Immediate Global Rejection\n• >= 2 BUY & 0 VETO? -> Approved\n• Otherwise -> Deferred (HOLD)"}
-    end
-
-    subgraph OutputLayer["Pydantic v2 Schema Output"]
-        RES["CandidateDeliberation Schema\n• recommendation: BUY / HOLD / VETO\n• confidence_score: 0.0 - 1.0\n• specialist_votes: [Fundamental, Technical, Risk]\n• synthesis_memo: Capital allocation rationale"]
-    end
-
-    FA & TA & RM --> COT
-    COT --> QUORUM
-    QUORUM --> PM
-    PM --> RES
-```
-
-### Specialist System Prompt Directory (`prompts/`)
-| Agent Persona | Prompt File | Core Responsibilities & Institutional Scope |
+| Intelligence Layer | Metrics & Signals | Rationale & Protection |
 | :--- | :--- | :--- |
-| **Fundamental Analyst** | [`prompts/fundamental_analyst.md`](prompts/fundamental_analyst.md) | Economic moat scorecards, net margin floors ($>0\%$), Wall Street forward EPS revisions, institutional analyst consensus, smart-money float sponsorship, and promoter governance forensics. |
-| **Technical Analyst** | [`prompts/technical_analyst.md`](prompts/technical_analyst.md) | 6M/1M relative momentum, 200-day SMA baseline trend integrity, weekly RSI overbought/oversold boundaries, institutional accumulation flow, and anti-churn discipline. |
-| **Chief Risk Officer** | [`prompts/risk_manager.md`](prompts/risk_manager.md) | Bounded beta collars ($1.40 - 2.80$), $\pm 48\text{h}$ earnings blackout penalties, 60-day tenure locks, SEBI ASM/GSM surveillance filters, and 50% wallet-drain protection. **Holds absolute veto authority**. |
-| **Portfolio Manager** | [`prompts/portfolio_manager.md`](prompts/portfolio_manager.md) | Cross-sectional Z-score consensus Q-synthesis, concentrated conviction caps ($\le 3$ assets), large-capital proportional deployment, zero-limbo absorption, and Git memory immutability. |
+| **1. Forward Wall Street Revisions** | `forecastEpsGrowthPercent` | Ingests consensus 12-month forward EPS growth revisions; caps outlier biases at $+250\%$. |
+| **2. Equity Research Consensus** | `analystBuyPercent`, `analystTargetPrice` | Mandates $\ge 65\%$ institutional buy consensus and positive 12-month target upside. |
+| **3. Smart-Money Float Sponsorship** | `instown` (Institutional Ownership %) | Requires institutional float backing by Tier-1 asset managers (BlackRock, Vanguard, sovereign funds, DIIs). |
+| **4. Forensic Balance Sheet Audit** | Promoter Pledge Forensics, $\text{D/E} \le 3.0$ | Disqualifies promoter pledge traps, excessive financial leverage, and negative cash flows. |
+| **5. Regulatory Surveillance Defense** | SEBI ASM / GSM Frameworks | Real-time screening against exchange surveillance tags; triggers immediate **ABSOLUTE VETO**. |
+| **6. Noise & Churn Immunity** | Multi-Month Holding Horizon | Eliminates taxable churn (31.2% STCG) and broker fee drag through patient compounding. |
 
-### Try Live Committee Deliberation:
+---
+
+## Multi-Agent Deliberation Engine
+
+Candidate assets are evaluated through specialized agent personas defined in [`prompts/`](prompts/):
+
+| Agent Persona | System Prompt | Mandate & Invariants |
+| :--- | :--- | :--- |
+| **Fundamental Analyst** | [`prompts/fundamental_analyst.md`](prompts/fundamental_analyst.md) | Economic moat analysis, positive margin floor ($>0\%$), forward EPS growth revisions, institutional sponsorship, and promoter governance forensics. |
+| **Technical Analyst** | [`prompts/technical_analyst.md`](prompts/technical_analyst.md) | 6M/1M relative momentum velocity, 200-day SMA baseline trend integrity, weekly RSI oscillator boundaries (35/75), and institutional accumulation flow. |
+| **Chief Risk Officer** | [`prompts/risk_manager.md`](prompts/risk_manager.md) | Bounded beta collars ($1.40 - 2.80$), $\pm 48\text{h}$ earnings blackout windows, 60-day anti-churn tenure locks, SEBI ASM/GSM surveillance filters, and 50% wallet-drain limits. **Holds absolute veto authority**. |
+| **Portfolio Manager** | [`prompts/portfolio_manager.md`](prompts/portfolio_manager.md) | Cross-sectional Z-score consensus Q-synthesis, concentrated conviction caps ($\le 3$), large-capital proportional deployment, zero-limbo absorption, and Git memory immutability. |
+
+### Running a Committee Deliberation:
 ```bash
 python agent.py debate ASML
 ```
-*Sample Output*:
-```text
-[*] Initiating Multi-Agent Committee Deliberation on ASML...
 
+<details>
+<summary>View Sample Deliberation Trace</summary>
+
+```text
 ================================================================================
  [COMMITTEE DELIBERATION: ASML | RECOMMENDATION: BUY]
  Confidence Score: 85.0% | Quorum: 3 BUY, 0 HOLD, 0 VETO
@@ -296,153 +202,120 @@ Quorum reached: 3/3 BUY votes. Strong risk-adjusted secular alignment.
 --- [Committee Synthesis Memo] ---
   APPROVED FOR ALLOCATION: Supermajority conviction (3/3 votes). High-margin market monopoly.
 ```
+</details>
 
 ---
 
-## 🧪 2026 SOTA Evaluation & Self-Test Suite
+## Verification & Evaluation Suites
 
-The codebase features two automated verification suites ensuring **100% mathematical integrity and fiduciary conformance**:
+The platform includes two automated verification suites ensuring mathematical and fiduciary integrity:
 
-### 1. SOTA Agentic Evaluation Suite (`agent.py eval`)
-Evaluates LLM reasoning drift, prompt fidelity, and anti-ruin adherence:
-```bash
-python agent.py eval
-```
+### 1. Agentic Evaluation Benchmark (`python agent.py eval`)
 | Benchmark Test | Stress Scenario Evaluated | Expected Fiduciary Behavior | Result |
 | :--- | :--- | :--- | :---: |
-| **1. Cash-Burner Growth Trap** | High revenue growth (+80%), 95% buy rating, but net margin $-6.5\%$. | Risk Manager MUST emit absolute VETO. | **PASS** |
-| **2. Hyper-Beta Volatility Spike** | Speculative lottery ticket with Beta $= 3.25 > 2.80$. | Volatility collar triggers instant VETO. | **PASS** |
-| **3. Earnings Blackout Window** | Top-scoring monopoly reporting earnings within 48 hours. | Event-risk guard forces vote to HOLD. | **PASS** |
+| **1. Cash-Burner Trap** | High revenue growth (+80%), 95% buy rating, but net margin $-6.5\%$. | Risk Manager MUST emit absolute VETO. | **PASS** |
+| **2. Hyper-Beta Volatility** | Speculative lottery ticket with Beta $= 3.25 > 2.80$. | Volatility collar triggers instant VETO. | **PASS** |
+| **3. Earnings Blackout** | Top-scoring monopoly reporting earnings within 48 hours. | Event-risk guard forces vote to HOLD. | **PASS** |
 | **4. Anti-Churn Tenure Lock** | Asset held for 25 days experiencing market dip. | 60-day tenure lock protects against liquidation. | **PASS** |
-| **5. Overbought RSI Pullback Guard** | Parabolic stock with weekly RSI $= 84.5 > 76.0$. | Technical analyst forces HOLD to await entry. | **PASS** |
+| **5. Overbought RSI Pullback** | Parabolic stock with weekly RSI $= 84.5 > 76.0$. | Technical analyst forces HOLD to await entry. | **PASS** |
 | **6. Supermajority Conviction** | ASML archetype with high margins, safe beta, strong trend. | Supermajority 3/3 BUY with $\ge 80\%$ confidence. | **PASS** |
-| **7. Pydantic Schema Conformance** | Complete committee output serialized to JSON. | Zero schema drift with verified `<thinking>` trace. | **PASS** |
+| **7. Schema Conformance** | Committee output serialized to JSON via Pydantic v2. | Zero schema drift with verified `<thinking>` trace. | **PASS** |
 
-### 2. Mathematical System Verification Suite (`agent.py test`)
-Validates execution mathematics, fee modeling, slippage guards, and memory integrity:
+### 2. Mathematical System Verification (`python agent.py test`)
+Validates execution mathematics, fee modeling, slippage guards, and memory integrity across 7 core systems:
+* Hard Invariant Enforcement ($\beta \ge 1.40$, Max Holdings $\le 3$, Momentum Weight $\ge 20\%$)
+* Earnings Guardrail ($\pm 48\text{h}$ Blackout)
+* Broker Tariff Modeling (0.15% brokerage + statutory charges)
+* Anti-Churn Tenure Lock (60-day liquidation shield)
+* Security & Credential Hygiene (Zero secret leakage)
+* Persistent Memory Integrity (Valid JSONL schemas)
+* Fiduciary Anti-Ruin Filter (Strict positive margins)
+
+---
+
+## Model Context Protocol (MCP 2.x) Integration
+
+AQTA includes a production-grade Model Context Protocol server ([`server/mcp_server.py`](server/mcp_server.py)) built on the official **MCP 2.x SDK**, enabling native integration with Antigravity, Claude Desktop, Cursor, and Windsurf:
+
+### Tools
+* `trading_get_portfolio_status`: Real-time cash, active holdings, P&L, and LRS transit metrics.
+* `trading_run_screener`: Multi-factor quantitative screener with anti-ruin vetoes.
+* `trading_deliberate_ticker`: SOTA multi-agent deliberation with test-time reasoning traces and Pydantic output.
+* `trading_preview_rebalance`: Non-mutating preview of portfolio rebalancing recommendations.
+* `trading_execute_rebalance`: Live execution with quote-lock resilience and Zero-Limbo safety.
+* `trading_drain_wallet`: Micro-drain of settled funds into target leader respecting 50% limits.
+* `trading_get_memory_state`: Inspects 4-tier memory, factor weights, and trade history.
+* `trading_run_system_test`: Runs 7-phase mathematical verification suite.
+* `trading_run_agent_evals`: Runs SOTA agentic evaluation and fiduciary benchmark suite.
+
+### Resources & Prompts
+* `resource://portfolio/status`: Real-time JSON snapshot of portfolio holdings and cash.
+* `resource://portfolio/rules`: Machine-readable Fiduciary Anti-Ruin invariants.
+* `resource://portfolio/memory`: 4-tier memory state (factor weights, retrospective summaries).
+* `prompt://committee_deliberation(ticker)`: Interactive prompt for conducting a full committee debate.
+
+---
+
+## CLI Reference
+
+[`agent.py`](agent.py) provides a unified command-line interface:
+
+### Core Allocation Cycles
 ```bash
-python agent.py test
+python agent.py auth                # Authenticate both Tickertape PRO and Zerodha Kite in 1 step
+python agent.py run                 # Non-mutating dual-market preview from scratch (Step 1)
+python agent.py run --execute       # Live dual-market execution across both brokers (Step 2)
+python agent.py status              # Real-time balances, demat holdings, P&L, and LRS status
 ```
-* **Scorecard**: `7/7 System Tests PASSED` (Fiduciary Anti-Ruin Filter, Hard Invariants, Earnings Guardrail, Pro Tariff Modeling, Anti-Churn Lock, Security & Credentials, Memory Integrity).
 
----
-
-## 🔌 Model Context Protocol (MCP 2.x) Architecture
-
-The repository includes a modern Model Context Protocol (MCP) server ([`server/mcp_server.py`](server/mcp_server.py)) built on the official **MCP 2.x SDK**, enabling agents in Claude Desktop, Cursor, Antigravity, VS Code, and Windsurf to interact natively with tools, live resources, and prompts.
-
-### 1. Available Tools
-| Tool Name | Parameters | Description |
-| :--- | :--- | :--- |
-| `trading_get_portfolio_status` | None | Real-time cash, holdings, P&L, LRS transit, and memory metrics |
-| `trading_run_screener` | `count` (default: 10) | Multi-factor quantitative screener with anti-ruin vetoes |
-| `trading_deliberate_ticker` | `ticker` (e.g. ASML) | SOTA multi-agent deliberation with test-time reasoning traces & Pydantic output |
-| `trading_preview_rebalance` | `budget`, `ignore_in_flight` | Non-mutating preview of buy/sell recommendations |
-| `trading_execute_rebalance` | `budget`, `ignore_in_flight` | Live execution with quote-lock resilience & Zero-Limbo safety |
-| `trading_drain_wallet` | `ticker` (default: ASML) | Recursive micro-drain of settled funds into target leader |
-| `trading_get_memory_state` | None | Inspects 4-tier memory, factor weights, and trade history |
-| `trading_run_system_test` | None | Runs 7-phase mathematical verification suite |
-| `trading_run_agent_evals` | None | Runs 2026 SOTA agentic evaluation & fiduciary benchmark suite |
-
-### 2. Live MCP Resources
-* `resource://portfolio/status`: Real-time JSON snapshot of portfolio holdings, settled cash, and stop-loss/take-profit status.
-* `resource://portfolio/rules`: Machine-readable Fiduciary Anti-Ruin rules and beta collar invariants.
-* `resource://portfolio/memory`: 4-tier memory state (factor weights, retrospective summaries, lessons learned).
-
-### 3. Interactive MCP Prompts
-* `committee_deliberation(ticker)`: Interactive prompt for conducting a full multi-agent committee debate.
-
----
-
-## ⚡ Unified Agent CLI Reference
-
-The repository provides a single, high-level CLI entry point ([`agent.py`](agent.py)):
-
+### Analysis & Deliberation
 ```bash
-# 0. Step 1: Unified Dual-Broker Authentication (Tickertape PRO + Zerodha Kite Connect v3)
-python agent.py auth                # Authenticates and verifies both platforms in a single step
-python agent.py auth --kite-only    # Authenticate only Zerodha Kite
-python agent.py auth --tt-only      # Authenticate only Tickertape PRO
-python agent.py tt-login            # Interactive OAuth 2.1 PKCE login for Tickertape PRO
-python agent.py kite-login          # Daily OAuth 2.0 login for Zerodha Kite Connect v3
+python agent.py debate ASML         # Run multi-agent committee debate on any ticker
+python agent.py retrospective       # Run Phase 0 adversarial review & factor calibration
+python agent.py in-screen           # Algorithmic screener across 5,000+ Indian stocks
+python agent.py in-audit VMARCIND   # Forensic Tickertape PRO audit on Indian stock
+```
 
-# 1. Step 2: Run Unified Dual-Market Investment Agent - Max-2 Interactions
-python agent.py run                 # Non-mutating preview of both US and Indian plans from scratch
-python agent.py run --execute       # Live dual-market execution across Tickertape & Zerodha Kite
+### Specialized Execution
+```bash
+python agent.py preview             # US equity allocation preview
+python agent.py execute             # US equity live execution
+python agent.py drain --ticker ASML # Deploy settled US cash respecting 50% limits
+python agent.py in-preview          # Indian equity allocation preview (Zerodha Kite)
+python agent.py in-execute          # Indian equity live execution (Zerodha Kite)
+python agent.py kite-status         # Zerodha Kite Connect v3 connectivity & demat balance audit
+```
 
-# 2. Audit status (balances, active holdings, P&L, in-flight LRS status)
-python agent.py status
-
-# 3. Run multi-agent committee debate with test-time reasoning traces on any ticker
-python agent.py debate ASML
-
-# 4. Run 2026 SOTA agentic evaluation & fiduciary benchmark suite
-python agent.py eval
-
-# 5. Preview monthly rebalancing plan for US equities (NON-MUTATING)
-python agent.py preview
-
-# 6. Execute confirmed live US rebalancing trades
-python agent.py execute [--ignore-in-flight] [--budget BUDGET]
-
-# 7. Drain remaining settled US cash into target asset (e.g. ASML)
-python agent.py drain --ticker ASML
-
-# 8. Run Phase 0 adversarial review & factor calibration
-python agent.py retrospective
-
-# 9. Execute 7-phase self-testing verification suite
-python agent.py test
-
-# 10. Synchronize memory and codebase to remote Git
-python agent.py sync
-
-# 11. Start modern Model Context Protocol (MCP 2.x) server
-python agent.py serve-mcp
-
-# 12. Algorithmic screener across 5,000+ Indian stocks (Tickertape PRO)
-python agent.py in-screen [--min-beta 1.40] [--max-price 5500]
-
-# 13. Deep forensic Tickertape PRO audit on any Indian stock
-python agent.py in-audit VMARCIND
-
-# 14. Preview Indian equity allocation (Zerodha Kite routing)
-python agent.py in-preview [--budget 16000]
-
-# 15. Execute confirmed live Indian equity allocation (Zerodha Kite direct order routing)
-python agent.py in-execute [--budget 16000]
-
-# 16. Audit Zerodha Kite Connect v3 connectivity & live demat balances
-python agent.py kite-status
+### System Administration
+```bash
+python agent.py test                # Run 7-phase mathematical system verification
+python agent.py eval                # Run 7-phase SOTA agentic evaluation benchmark
+python agent.py sync                # Synchronize memory state and codebase to remote Git
+python agent.py serve-mcp           # Launch Model Context Protocol (MCP 2.x) server
 ```
 
 ---
 
-## 🚀 Turnkey Setup on Any Computer
+## Getting Started
 
-### 1. Clone & Bootstrap
+### 1. Installation
 ```bash
-# Clone the repository
 git clone https://github.com/kevinhayesanderson/autonomous-trading-agent.git
 cd autonomous-trading-agent
-
-# Install dependencies (Pydantic v2, official MCP 2.x SDK, Requests, KiteConnect, python-dotenv)
 pip install -r requirements.txt
-
-# Run the turnkey environment verification bootstrapper
 python scripts/setup_env.py
 ```
 
-### 2. Configure Environment (`.env`)
-Copy [`.env.example`](.env.example) to `.env` and fill in your credentials:
+### 2. Environment Configuration
+Copy [`.env.example`](.env.example) to `.env` and provide your credentials:
 ```ini
-# Zerodha Kite Connect v3 (Indian Equity Execution)
+# Zerodha Kite Connect v3 (Indian Equities)
 KITE_API_KEY=your_kite_api_key
 KITE_API_SECRET=your_kite_api_secret
 KITE_REDIRECT_URL=http://127.0.0.1:8000/
 PREFERRED_IN_BROKER=zerodha
 
-# Tickertape PRO (US & Indian Forensic Screener)
+# Tickertape PRO (US Equities & Indian Screener)
 TICKERTAPE_TOKEN=your_bearer_token
 
 # Alpaca Paper Trading (Shadow Sandbox)
@@ -450,50 +323,40 @@ ALPACA_KEY=your_alpaca_key
 ALPACA_SECRET=your_alpaca_secret
 ALPACA_BASE_URL=https://paper-api.alpaca.markets/v2
 
-# Alpha Vantage (Free Technical Indicators)
+# Alpha Vantage (Technical Indicators)
 AV_API_KEY=your_alpha_vantage_key
 ```
 
-To authenticate sessions for trading in 1 step:
+### 3. Verify System Health
 ```bash
-python agent.py auth
-```
-
-### 3. Verify System Health & Agentic Evals
-```bash
-# Run the 7-phase mathematical verification suite
 python agent.py test
-
-# Run the 2026 SOTA agentic evaluation suite
 python agent.py eval
 ```
 
 ---
 
-## 🔄 Self-Reflective Memory & Feedback Loop
+## Memory Subsystem & Git Ledger
 
-The agent maintains a persistent 4-tier memory subsystem that continuously learns from market outcomes:
+AQTA maintains an immutable 4-tier memory subsystem that continuously learns from market outcomes:
 
 ```
 memory/
-├── trade_journal.jsonl       # Immutable ledger of all executed trades & entry factors (Local / Private)
-├── trade_journal.example.jsonl # Anonymized public reference schema for open-source reproducibility
-├── factor_weights.json       # Calibrated quantitative weights & hard invariants (Persisted to disk)
-├── retrospective_log.jsonl   # Historical logs of adversarial post-mortem reviews
-├── lessons_learned.md        # Synthesized institutional knowledge & error analysis
-└── evidence_ledger.jsonl     # Full mathematical audit trail of cycle scores
+├── trade_journal.jsonl         # Immutable ledger of all executed trades & entry factors
+├── trade_journal.example.jsonl # Anonymized public reference schema
+├── factor_weights.json         # Calibrated quantitative weights & hard invariants
+├── retrospective_log.jsonl     # Historical logs of adversarial post-mortem reviews
+├── lessons_learned.md          # Synthesized institutional knowledge & error analysis
+└── evidence_ledger.jsonl       # Full mathematical audit trail of cycle scores
 ```
 
 Every execution triggers an **Adversarial Retrospective**:
 1. **Attribution**: Calculates realized return of active portfolio vs benchmarks (SOXX for US, Nifty Midcap for IN).
-2. **Dynamic Calibration**: Tunes factor weights ($W_{\text{6M}}$, $W_{\text{1M}}$, $W_{\beta}$, $W_{\text{EPS}}$, $W_{\text{Upside}}$) to reward outperforming factors while preserving hard invariants ($\beta \ge 1.40$, Max Holdings $\le 3$). Updates persist directly to [`memory/factor_weights.json`](memory/factor_weights.json).
+2. **Dynamic Calibration**: Tunes factor weights ($W_{\text{6M}}, W_{\text{1M}}, W_{\beta}, W_{\text{EPS}}, W_{\text{Upside}}$) to reward outperforming factors while preserving hard invariants ($\beta \ge 1.40$, Max Holdings $\le 3$).
 3. **Git Synchronization**: Automatically commits and pushes updated weights to `origin/main` via [`scripts/git_sync.py`](scripts/git_sync.py).
 
 ---
 
-## 🤖 Full Agentic Readiness & Standards
-
-This repository is compliant with the open standard for AI coding agents:
+## Agent Specifications & Standards
 * **[`AGENTS.md`](AGENTS.md)**: Master operating manual for Antigravity, Claude Code, Cursor, Windsurf, and Codex.
 * **[`GEMINI.md`](GEMINI.md)**: Antigravity workspace rules and user interaction contracts.
 * **[`SKILL.md`](SKILL.md)**: Native agent skill definition and tool schemas.
@@ -502,6 +365,6 @@ This repository is compliant with the open standard for AI coding agents:
 
 ---
 
-## 📄 License
+## License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+Distributed under the **MIT License**. See `LICENSE` for details.
