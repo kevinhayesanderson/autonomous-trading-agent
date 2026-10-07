@@ -48,11 +48,13 @@ def audit_tenure_lock(ticker: str, tenure_days: Optional[int] = None) -> Tuple[b
 def audit_lrs_settlement(token: str) -> List[Dict[str, Any]]:
     """Audits RBI LRS outward remittances and detects in-flight bank transfers."""
     print("\n--- RBI LRS & Banking Clearance Audit (HDFC -> US Broker) ---")
-    trans_res = call_tickertape_mcp(token, "us_account_transactions", {"type": "deposit", "limit": 5})
-    transactions = trans_res.get("transactions", []) if isinstance(trans_res, dict) else []
+    fund_res = call_tickertape_mcp(token, "us_account_fund_history_read")
+    transactions = fund_res.get("transactions", []) if isinstance(fund_res, dict) else []
     
     pending = []
     for tx in transactions:
+        if tx.get("type") != "deposit":
+            continue
         status = tx.get("status", "").lower()
         if status in ["pending", "processing", "initiated", "in_transit"]:
             pending.append(tx)
@@ -68,16 +70,21 @@ def audit_lrs_settlement(token: str) -> List[Dict[str, Any]]:
                 pass
                 
     if pending:
-        for p in pending:
+        tot_inr = sum(float(p.get("metadata", {}).get("sourceAmount", 0)) for p in pending)
+        tot_usd = sum(float(p.get("amount", 0)) for p in pending)
+        print(f"  * [!] {len(pending)} IN-FLIGHT DEPOSITS DETECTED: Total ₹{tot_inr:,.2f} INR (~${tot_usd:,.2f} USD)")
+        for idx, p in enumerate(pending, 1):
             pmeta = p.get("metadata", {})
-            print(f"  * [!] IN-FLIGHT DEPOSIT DETECTED: ₹{pmeta.get('sourceAmount', 'N/A')} INR (${p.get('amount')} USD) | Status: {p.get('status')}")
+            timeline = pmeta.get("timeline", [])
+            expected = "Pending"
+            for ev in timeline:
+                if ev.get("expectedAt"):
+                    expected = ev.get("expectedAt")
+            print(f"    #{idx}: ₹{float(pmeta.get('sourceAmount', 0)):,.2f} INR (${p.get('amount')} USD) | Bank Txn: {pmeta.get('txnId')} | Expected: {expected} | Status: {p.get('status').upper()}")
     else:
         print("  * In-Flight LRS Transfers: None currently in transit.")
 
     print("  * Operational Banking Rule: HDFC outward remittance cut-off is 1:00 PM IST.")
-    print("  * [CRITICAL CALENDAR ALERT]: Friday, October 2, 2026 is Gandhi Jayanti (Indian National Bank Holiday).")
-    print("    If deposit is initiated on Thursday, Oct 1 after 1:00 PM IST, funds will NOT clear until Monday, Oct 5!")
-    print("    Rule: Initiate INR deposit on T-2 (Tuesday Sep 29 / Wednesday Sep 30 before 12:00 PM IST) for Oct 1 execution.")
     return pending
 
 def audit_portfolio_health(token: str) -> Tuple[List[Tuple[str, str, float]], List[Dict[str, Any]]]:
