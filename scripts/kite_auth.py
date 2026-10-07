@@ -117,7 +117,14 @@ def open_url_in_browser(url: str):
     """Reliably opens a URL in Google Chrome or default browser on Windows / cross-platform."""
     import subprocess
     if sys.platform == "win32":
-        # 1. Try launching Chrome executable directly without cmd.exe
+        # 1. Native Windows Explorer shell (guarantees interactive desktop browser launch)
+        try:
+            subprocess.Popen(f'explorer.exe "{url}"', shell=True)
+            return
+        except Exception:
+            pass
+
+        # 2. Try launching Chrome executable directly without cmd.exe
         chrome_paths = [
             r"C:\Program Files\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -131,7 +138,7 @@ def open_url_in_browser(url: str):
                 except Exception:
                     pass
 
-        # 2. Try Windows cmd start with caret-escaped ampersands
+        # 3. Try Windows cmd start with caret-escaped ampersands
         try:
             escaped = url.replace("&", "^&")
             subprocess.Popen(f'cmd.exe /c start "" "{escaped}"', shell=True)
