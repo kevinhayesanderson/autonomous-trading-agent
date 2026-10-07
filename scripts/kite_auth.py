@@ -104,7 +104,7 @@ def save_token(session_data: dict):
         except Exception as e:
             print(f"  [!] Note: could not write to {path}: {e}")
 
-def seamless_authenticate(timeout_seconds: int = 25, open_browser: bool = True):
+def seamless_authenticate(timeout_seconds: int = 60, open_browser: bool = True):
     """
     Seamless background authentication for Zerodha Kite Connect v3:
     1. Spins up local callback server on http://127.0.0.1:8000/
@@ -116,7 +116,7 @@ def seamless_authenticate(timeout_seconds: int = 25, open_browser: bool = True):
     try:
         api_key, api_secret, redirect_url = load_credentials()
     except Exception as e:
-        print(f"  [!] Kite credentials missing: {e}")
+        print(f"  [!] Kite credentials missing: {e}", flush=True)
         return None
 
     kite = KiteConnect(api_key=api_key)
@@ -133,23 +133,24 @@ def seamless_authenticate(timeout_seconds: int = 25, open_browser: bool = True):
         server = ReusableHTTPServer((host, port), CallbackHandler)
         server.timeout = 1.0  # 1 second poll tick
     except Exception as e:
-        print(f"  [!] Could not start local callback server on {host}:{port}: {e}")
+        print(f"  [!] Could not start local callback server on {host}:{port}: {e}", flush=True)
         return None
 
     if open_browser and not os.environ.get("HEADLESS"):
-        print(f"  * Hitting default browser with Zerodha Kite authorization URL...")
-        print(f"    -> {login_url}")
+        print(f"  * Hitting default browser with Zerodha Kite authorization URL...", flush=True)
+        print(f"    -> {login_url}", flush=True)
         try:
             webbrowser.open(login_url)
         except Exception as e:
-            print(f"  [!] Could not launch browser automatically: {e}")
+            print(f"  [!] Could not launch browser automatically: {e}", flush=True)
 
-    print(f"  * Listening on http://{host}:{port}/ for callback (timeout: {timeout_seconds}s)...")
+    print(f"  * Listening on http://{host}:{port}/ for callback (waiting up to {timeout_seconds}s)...", flush=True)
+    print(f"    👉 If prompted in your browser tab, please click 'Authorize'...", flush=True)
     start_time = time.time()
     try:
         while CallbackHandler.request_token is None:
             if time.time() - start_time > timeout_seconds:
-                print(f"  [!] Seamless browser authorization timed out after {timeout_seconds}s.")
+                print(f"  [!] Seamless browser authorization timed out after {timeout_seconds}s.", flush=True)
                 break
             server.handle_request()
     finally:
@@ -160,21 +161,21 @@ def seamless_authenticate(timeout_seconds: int = 25, open_browser: bool = True):
     if not req_token:
         return None
 
-    print(f"  [+] Captured request_token seamlessly: {req_token[:6]}...{req_token[-4:]}")
+    print(f"  [+] Captured request_token seamlessly: {req_token[:6]}...{req_token[-4:]}", flush=True)
     try:
         session = kite.generate_session(req_token, api_secret=api_secret)
         access_token = session.get("access_token")
         user_name = session.get("user_name", "Zerodha User")
         user_id = session.get("user_id", "")
-        print(f"  [SUCCESS] Authenticated as: {user_name} ({user_id})")
+        print(f"  [SUCCESS] Authenticated as: {user_name} ({user_id})", flush=True)
         save_token(session)
         kite.set_access_token(access_token)
         margins = kite.margins(segment="equity")
         cash = margins.get("available", {}).get("cash", 0.0)
-        print(f"  * Verified Available Cash in Zerodha: Rs {cash:,.2f} INR")
+        print(f"  * Verified Available Cash in Zerodha: Rs {cash:,.2f} INR", flush=True)
         return access_token
     except Exception as e:
-        print(f"  [!] Failed to exchange request_token: {e}")
+        print(f"  [!] Failed to exchange request_token: {e}", flush=True)
         return None
 
 def authenticate(direct_token: str = None):
