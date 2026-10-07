@@ -41,6 +41,29 @@ from scripts.git_sync import sync_system_to_git
 
 def cmd_run(args):
     """Executes the unified dual-market investment agent cycle completely from scratch."""
+    # Pre-Flight Authentication Gate
+    from trading_agent.core.zerodha import audit_kite_status
+    st = audit_kite_status()
+    if not st.get("authenticated") and not getattr(args, "us_only", False):
+        print("=" * 80)
+        print(" [!] ZERODHA KITE CONNECT v3 AUTHENTICATION REQUIRED")
+        print("=" * 80)
+        print("  Zerodha Kite daily session has expired (daily reset occurs at 6:00 AM IST).")
+        print("  To protect capital, AQTA strictly refuses to devise or execute an Indian allocation")
+        print("  plan using fictitious or unverified balances.")
+        print("\n  👉 Open this login URL in your browser to authorize today's session:")
+        from scripts.kite_auth import load_credentials
+        try:
+            k_key, _, _ = load_credentials()
+            print(f"     https://kite.zerodha.com/connect/login?api_key={k_key}&v=3")
+        except Exception:
+            pass
+        print("\n  Then authenticate via:")
+        print("     python agent.py kite-login --token <REQUEST_TOKEN>")
+        print("     (or reply with the redirected URL / request_token)")
+        print("=" * 80 + "\n")
+        sys.exit(1)
+
     is_exec = getattr(args, "execute", False) or getattr(args, "confirm", False)
     raw_b = getattr(args, "budget", None) or getattr(args, "in_budget", None)
     in_budget = float(raw_b) if raw_b and raw_b != "auto" else None
@@ -349,6 +372,7 @@ def cli_entrypoint():
         p_run = subparsers.add_parser(c_name, help="Run unified dual-market investment agent (Tickertape US + Zerodha Kite IN)")
         p_run.add_argument("--execute", "--confirm", action="store_true", help="Commit confirmed live allocations to both brokers")
         p_run.add_argument("--budget", "--in-budget", default="auto", help="Target Indian equity budget in INR (default: auto from Kite clear cash)")
+        p_run.add_argument("--us-only", action="store_true", help="Execute only US market cycle, skipping Indian equities")
 
     # status
     p_status = subparsers.add_parser("status", help="Audit live balances, holdings, and in-flight capital")

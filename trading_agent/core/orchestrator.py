@@ -80,13 +80,13 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     is_in_trading, in_session_status = is_nse_market_open()
     primary_in_broker = "Zerodha"
     
-    # Target deployment pool: if in_budget provided, use it; elif Zerodha is funded, use live cash; otherwise default to Rs 16,000 INR
+    # Target deployment pool: strictly use live cash or explicit in_budget. Never invent a phantom 16,000 pool.
     if in_budget is not None and float(in_budget) > 0.0:
         in_clear_cash = float(in_budget)
-    elif zerodha_cash >= 1000.0:
+    elif zerodha_auth:
         in_clear_cash = zerodha_cash
     else:
-        in_clear_cash = 16000.0  # Planned target deployment pool
+        in_clear_cash = 0.0
 
     print("\n  --- INDIAN EQUITY WALLET AUDIT (ZERODHA KITE CONNECT v3) ---")
     if zerodha_auth:
@@ -95,12 +95,13 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
         print(f"  * CNC Available Margin:      Rs {zerodha_margin.get('cnc_balance_available', 0.0):,.2f} INR")
         print(f"  * Settled Demat Holdings:    {len(zerodha_holdings)} assets active")
     else:
-        print("  * [Zerodha Kite Connect v3]: Session token pending (Run: python agent.py kite-login)")
+        print("  * [Zerodha Kite Connect v3]: Session token expired / pending.")
+        print("    -> Cannot devise live allocation without verified broker access!")
+        print("    -> Run: python agent.py kite-login to authenticate your daily session.")
     
-    print(f"  * Selected Execution Broker: Zerodha Kite (Target Capital Pool: Rs {in_clear_cash:,.2f} INR)")
-    if zerodha_cash < 1000.0:
-        print(f"    -> [CAPITAL CONTROLLER]: Current live cash is Rs {zerodha_cash:,.2f}. Planning basket for target Rs {in_clear_cash:,.2f} INR.")
-        print("       (Transfer funds to Kite before 'execute' to commit live on-market).")
+    print(f"  * Selected Execution Broker: Zerodha Kite (Deployable Capital: Rs {in_clear_cash:,.2f} INR)")
+    if zerodha_auth and in_clear_cash < 500.0:
+        print(f"    -> [CAPITAL CONTROLLER]: Available funds (Rs {in_clear_cash:,.2f}) below minimum allocation threshold (Rs 500.00).")
 
     print(f"  * Indian Market Session:     {in_session_status}")
     if not is_in_trading:
@@ -192,97 +193,109 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     # 5.2 Indian Trade Plan Formulation
     print(f"\n[PLAN 2: INDIAN EQUITY CONVICTION BASKET] -> ROUTED TO ZERODHA KITE (DELIVERY CASH / GTT)")
     
-    statutory_buffer = max(50.0, in_clear_cash * 0.015)
-    in_target_net = in_clear_cash - statutory_buffer
-    
-    candidate_pool = sorted(
-        [d for d in in_delibs if d.recommendation == "BUY" and d.veto_votes == 0],
-        key=lambda x: (x.confidence_score, x.buy_votes),
-        reverse=True
-    )
-    
-    # Map candidate prices accurately from Kite LTP or Tickertape metrics
-    cand_price_map = {}
-    for d in candidate_pool:
-        t = d.ticker
-        p = get_zerodha_ltp(t)
-        if not p or p <= 0.0:
-            p = float(cand_map.get(t, {}).get("metrics", {}).get("lastPrice") or cand_map.get(t, {}).get("lastPrice") or 500.0)
-        cand_price_map[t] = p
-
-    # Select candidates that fit comfortably without excessive concentration
-    approved_in = []
-    for d in candidate_pool:
-        p = cand_price_map.get(d.ticker, 500.0)
-        # For small accounts (<= 6000 INR), skip single shares that exceed 45% of total budget
-        if in_clear_cash <= 6000.0 and p > (in_target_net * 0.45):
-            continue
-        approved_in.append(d)
-        if len(approved_in) >= 3:
-            break
-            
-    if not approved_in:
-        approved_in = candidate_pool[:3]
-
-    num_assets = max(1, len(approved_in))
-    target_per_in_asset = in_target_net / num_assets
-    
     in_allocations = []
     in_total_invested = 0.0
+    in_cash_buffer = 0.0
 
-    for d in approved_in:
-        t = d.ticker
-        price = cand_price_map[t]
-        qty = max(1, int(target_per_in_asset // price))
-        inv = qty * price
-        in_total_invested += inv
-        sl = round(price * 0.88, 1)  # -12% Stop Loss
-        tp = round(price * 1.35, 1)  # +35% Take Profit
-        in_allocations.append({
-            "ticker": t,
-            "price": price,
-            "shares": qty,
-            "invested": round(inv, 2),
-            "stop_loss": sl,
-            "take_profit": tp,
-            "deliberation": d
-        })
+    if not zerodha_auth and (in_budget is None or in_budget <= 0.0):
+        print("  * Status: [PAUSED - AUTHENTICATION REQUIRED]")
+        print("    -> Zerodha Kite session token is expired / pending.")
+        print("    -> AQTA strictly refuses to fabricate phantom allocations without verified broker access.")
+        print("    -> Authenticate your daily session via: python agent.py kite-login")
+    elif in_clear_cash < 500.0:
+        print(f"  * Status: [HOLD CASH - INSUFFICIENT FUNDS]")
+        print(f"    -> Clear cash balance (Rs {in_clear_cash:,.2f} INR) is below minimum investment threshold (Rs 500.00).")
+        print("    -> Retaining available cash safely. Zero buy orders generated.")
+        in_cash_buffer = in_clear_cash
+    else:
+        statutory_buffer = max(50.0, in_clear_cash * 0.015)
+        in_target_net = in_clear_cash - statutory_buffer
+        
+        candidate_pool = sorted(
+            [d for d in in_delibs if d.recommendation == "BUY" and d.veto_votes == 0],
+            key=lambda x: (x.confidence_score, x.buy_votes),
+            reverse=True
+        )
+        
+        # Map candidate prices accurately from Kite LTP or Tickertape metrics
+        cand_price_map = {}
+        for d in candidate_pool:
+            t = d.ticker
+            p = get_zerodha_ltp(t)
+            if not p or p <= 0.0:
+                p = float(cand_map.get(t, {}).get("metrics", {}).get("lastPrice") or cand_map.get(t, {}).get("lastPrice") or 500.0)
+            cand_price_map[t] = p
 
-    # If initial allocation exceeds in_target_net, trim shares from highest invested asset
-    while in_total_invested > in_target_net and any(a["shares"] > 1 for a in in_allocations):
-        highest_inv = max([a for a in in_allocations if a["shares"] > 1], key=lambda x: x["invested"])
-        highest_inv["shares"] -= 1
-        highest_inv["invested"] = round(highest_inv["shares"] * highest_inv["price"], 2)
-        in_total_invested = sum(a["invested"] for a in in_allocations)
+        # Select candidates that fit comfortably without excessive concentration
+        approved_in = []
+        for d in candidate_pool:
+            p = cand_price_map.get(d.ticker, 500.0)
+            # For small accounts (<= 6000 INR), skip single shares that exceed 45% of total budget
+            if in_clear_cash <= 6000.0 and p > (in_target_net * 0.45):
+                continue
+            approved_in.append(d)
+            if len(approved_in) >= 3:
+                break
+                
+        if not approved_in:
+            approved_in = candidate_pool[:3]
 
-    # Absorb residual cash into lowest price asset safely without breaching statutory buffer
-    in_cash_buffer = round(in_clear_cash - in_total_invested, 2)
-    lowest_in = min(in_allocations, key=lambda x: x["price"])
-    while (in_cash_buffer - lowest_in["price"]) >= statutory_buffer:
-        lowest_in["shares"] += 1
-        lowest_in["invested"] = round(lowest_in["shares"] * lowest_in["price"], 2)
-        in_total_invested += lowest_in["price"]
+        num_assets = max(1, len(approved_in))
+        target_per_in_asset = in_target_net / num_assets
+        
+        for d in approved_in:
+            t = d.ticker
+            price = cand_price_map[t]
+            qty = max(1, int(target_per_in_asset // price))
+            inv = qty * price
+            in_total_invested += inv
+            sl = round(price * 0.88, 1)  # -12% Stop Loss
+            tp = round(price * 1.35, 1)  # +35% Take Profit
+            in_allocations.append({
+                "ticker": t,
+                "price": price,
+                "shares": qty,
+                "invested": round(inv, 2),
+                "stop_loss": sl,
+                "take_profit": tp,
+                "deliberation": d
+            })
+
+        # If initial allocation exceeds in_target_net, trim shares from highest invested asset
+        while in_total_invested > in_target_net and any(a["shares"] > 1 for a in in_allocations):
+            highest_inv = max([a for a in in_allocations if a["shares"] > 1], key=lambda x: x["invested"])
+            highest_inv["shares"] -= 1
+            highest_inv["invested"] = round(highest_inv["shares"] * highest_inv["price"], 2)
+            in_total_invested = sum(a["invested"] for a in in_allocations)
+
+        # Absorb residual cash into lowest price asset safely without breaching statutory buffer
         in_cash_buffer = round(in_clear_cash - in_total_invested, 2)
+        lowest_in = min(in_allocations, key=lambda x: x["price"])
+        while (in_cash_buffer - lowest_in["price"]) >= statutory_buffer:
+            lowest_in["shares"] += 1
+            lowest_in["invested"] = round(lowest_in["shares"] * lowest_in["price"], 2)
+            in_total_invested += lowest_in["price"]
+            in_cash_buffer = round(in_clear_cash - in_total_invested, 2)
 
-    for a in in_allocations:
-        a["weight_pct"] = round((a["invested"] / in_clear_cash) * 100, 1)
+        for a in in_allocations:
+            a["weight_pct"] = round((a["invested"] / in_clear_cash) * 100, 1)
 
-    print("-" * 105)
-    print(f" {'Asset':<12} | {'Live Price':<12} | {'Qty':<6} | {'Capital Deployed':<18} | {'Weight':<8} | {'GTT Stop-Loss':<15} | {'GTT Target'}")
-    print("-" * 105)
-    for a in in_allocations:
-        print(f" {a['ticker']:<12} | Rs {a['price']:<9.2f} | {a['shares']:<6} | Rs {a['invested']:<15.2f} | {a['weight_pct']:<5.1f}%  | Rs {a['stop_loss']:<12.1f} | Rs {a['take_profit']:<7.1f}")
-    print("-" * 105)
-    print(f"  * Gross Capital Pool:     Rs {in_clear_cash:,.2f} INR (Zerodha Kite)")
-    print(f"  * Total Equity Deployed:  Rs {in_total_invested:,.2f} INR")
-    print(f"  * Zerodha Cash Buffer:    Rs {in_cash_buffer:,.2f} INR (Reserved for statutory levies)")
+        print("-" * 105)
+        print(f" {'Asset':<12} | {'Live Price':<12} | {'Qty':<6} | {'Capital Deployed':<18} | {'Weight':<8} | {'GTT Stop-Loss':<15} | {'GTT Target'}")
+        print("-" * 105)
+        for a in in_allocations:
+            print(f" {a['ticker']:<12} | Rs {a['price']:<9.2f} | {a['shares']:<6} | Rs {a['invested']:<15.2f} | {a['weight_pct']:<5.1f}%  | Rs {a['stop_loss']:<12.1f} | Rs {a['take_profit']:<7.1f}")
+        print("-" * 105)
+        print(f"  * Gross Capital Pool:     Rs {in_clear_cash:,.2f} INR (Zerodha Kite)")
+        print(f"  * Total Equity Deployed:  Rs {in_total_invested:,.2f} INR")
+        print(f"  * Zerodha Cash Buffer:    Rs {in_cash_buffer:,.2f} INR (Reserved for statutory levies)")
 
-    print(f"\n[*] ZERODHA KITE ORDER FORMULATION (DELIVERY CASH / GTT):")
-    for idx, a in enumerate(in_allocations, 1):
-        print(f"  {idx}. BUY {a['shares']} shares of {a['ticker']} @ Limit Rs {a['price']:.2f}")
-        print(f"     -> Route: ZERODHA | Segment: Delivery (CNC) | Order: GTT / AMO")
-        print(f"     -> GTT Stop-Loss Trigger:  Rs {a['stop_loss']:.1f} (-12.0%)")
-        print(f"     -> GTT Take-Profit Target: Rs {a['take_profit']:.1f} (+35.0%)")
+        print(f"\n[*] ZERODHA KITE ORDER FORMULATION (DELIVERY CASH / GTT):")
+        for idx, a in enumerate(in_allocations, 1):
+            print(f"  {idx}. BUY {a['shares']} shares of {a['ticker']} @ Limit Rs {a['price']:.2f}")
+            print(f"     -> Route: ZERODHA | Segment: Delivery (CNC) | Order: GTT / AMO")
+            print(f"     -> GTT Stop-Loss Trigger:  Rs {a['stop_loss']:.1f} (-12.0%)")
+            print(f"     -> GTT Take-Profit Target: Rs {a['take_profit']:.1f} (+35.0%)")
 
     # =========================================================================
     # STEP 6: EXECUTION / COMMIT GATEWAY
