@@ -61,16 +61,19 @@ jobs:
           ALPACA_KEY: ${{ secrets.ALPACA_KEY }}
           ALPACA_SECRET: ${{ secrets.ALPACA_SECRET }}
         run: |
-          EXEC_FLAG=""
-          if [ "${{ inputs.execute }}" = "true" ]; then
+          EXEC_FLAG="preview"
+          if [ "${{ github.event.inputs.execute }}" = "true" ]; then
             EXEC_FLAG="execute"
-          else
-            EXEC_FLAG="preview"
           fi
           
           IN_FLIGHT_FLAG=""
-          if [ "${{ inputs.ignore_in_flight }}" = "true" ]; then
+          if [ "${{ github.event.inputs.ignore_in_flight }}" = "true" ]; then
             IN_FLIGHT_FLAG="--ignore-in-flight"
           fi
           
-          python agent.py $EXEC_FLAG --mode ${{ inputs.mode || 'paper' }} $IN_FLIGHT_FLAG
+          MODE="${{ github.event.inputs.mode }}"
+          if [ -z "$MODE" ]; then
+            MODE="paper"
+          fi
+          
+          python agent.py $EXEC_FLAG --mode $MODE $IN_FLIGHT_FLAG
