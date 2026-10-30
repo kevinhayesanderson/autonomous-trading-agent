@@ -40,38 +40,54 @@ def run_quantitative_screener(token: str, active_weights: Dict[str, Any], count:
     2. Hyper-beta lottery tickets (Beta > 2.80)
     3. Falling knives (Price < SMA 200)
     """
-    # Query institutional universe (NASDAQ 100 / S&P 500) with proper match and project schema
+    # Query across the entire US institutional universe (S&P 500, NASDAQ 100, Dow Jones)
     uni_res = call_tickertape_mcp(token, "us_screener_universes", {})
-    asset_ids = None
-    if isinstance(uni_res, list):
-        for u in uni_res:
-            if u.get("title") == "NASDAQ 100":
-                asset_ids = u.get("assetIds", [])
-                break
+    target_universes = ["S&P 500", "NASDAQ 100", "Dow Jones"]
+    universe_map = {u.get("title"): u.get("assetIds", []) for u in uni_res if isinstance(u, dict)}
 
-    query = {
-        "sortBy": "6MReturn,100,*",
-        "sortOrder": -1,
-        "count": count
-    }
-    if asset_ids:
-        query["assetIds"] = asset_ids
-        query["match"] = json.dumps({"marketCapitalization": {"g": 20000}})
-        query["project"] = [
-            "marketCapitalization", "profitMarginPercent", "profitMarginPercent,100,*",
-            "beta", "prevClosePrice", "movingAverage200Day", "movingAverage50Day",
-            "6MReturn,100,*", "1MReturn,100,*", "forecastEpsGrowthPercent",
-            "analystBuyPercent", "returnOnEquityTtm,100,*",
-            "analystTargetPrice,prevClosePrice,-,prevClosePrice,/,100,*"
-        ]
-    else:
-        query["filter"] = [
-            {"field": "sector", "operator": "in", "values": ["Technology"]},
-            {"field": "marketCap", "operator": "in", "values": ["Mega Cap", "Large Cap"]}
-        ]
+    project_fields = [
+        "marketCapitalization", "profitMarginPercent", "profitMarginPercent,100,*",
+        "beta", "prevClosePrice", "movingAverage200Day", "movingAverage50Day",
+        "6MReturn,100,*", "1MReturn,100,*", "forecastEpsGrowthPercent",
+        "analystBuyPercent", "returnOnEquityTtm,100,*",
+        "analystTargetPrice,prevClosePrice,-,prevClosePrice,/,100,*"
+    ]
 
-    res = call_tickertape_mcp(token, "us_screener_stocks", query)
-    items = res.get("result", []) if isinstance(res, dict) else []
+    items = []
+    seen_tickers = set()
+
+    for uni_title in target_universes:
+        asset_ids = universe_map.get(uni_title, [])
+        if not asset_ids:
+            continue
+        query = {
+            "assetIds": asset_ids,
+            "sortBy": "6MReturn,100,*",
+            "sortOrder": -1,
+            "count": min(count, 10),
+            "match": json.dumps({"marketCapitalization": {"g": 20000}}),
+            "project": project_fields
+        }
+        res = call_tickertape_mcp(token, "us_screener_stocks", query)
+        uni_items = res.get("result", []) if isinstance(res, dict) else []
+        for it in uni_items:
+            t = it.get("ticker")
+            if t and t not in seen_tickers:
+                seen_tickers.add(t)
+                items.append(it)
+
+    if not items:
+        # Fallback to whole-market Large & Mega Cap filter across all sectors
+        query = {
+            "sortBy": "6MReturn,100,*",
+            "sortOrder": -1,
+            "count": count,
+            "filter": [
+                {"field": "marketCap", "operator": "in", "values": ["Mega Cap", "Large Cap"]}
+            ]
+        }
+        res = call_tickertape_mcp(token, "us_screener_stocks", query)
+        items = res.get("result", []) if isinstance(res, dict) else []
 
     candidates = []
     for item in items:

@@ -337,19 +337,33 @@ def deliberate_ticker(ticker: str, token: Optional[str] = None, candidate_data: 
     p = get_live_ticker_quote(token, ticker) if token else 100.0
     rsi = get_alpha_vantage_rsi(ticker)
 
+    # Dynamic metric extraction from candidate_data if provided
+    cd = candidate_data or {}
+    m = cd.get("metrics", cd.get("factors", cd))
+    beta = float(m.get("beta") or (1.75 if ticker in ["ASML", "NVDA", "TSM", "MRVL"] else 1.50))
+    raw_nm = float(m.get("profitMarginPercent,100,*") or m.get("profitMarginPercent") or m.get("net_margin") or 0.0)
+    if raw_nm != 0.0:
+        net_margin = raw_nm * 100.0 if (0.0 < abs(raw_nm) <= 1.0) else raw_nm
+    else:
+        net_margin = 28.5 if ticker in ["ASML", "TSM", "NVDA"] else 18.0
+    eps_fwd = float(m.get("forecastEpsGrowthPercent") or m.get("eps_fwd") or 24.0)
+    ret_6m = float(m.get("6MReturn,100,*") or m.get("ret_6m") or 42.0)
+    ret_1m = float(m.get("1MReturn,100,*") or m.get("ret_1m") or 3.8)
+    buy_pct = float(m.get("analystBuyPercent") or m.get("buy_pct") or 85.0)
+
     candidate = {
         "ticker": ticker.upper(),
-        "price": p or 100.0,
-        "beta": 1.75 if ticker in ["ASML", "NVDA", "TSM", "MRVL"] else 1.50,
-        "net_margin": 28.5 if ticker in ["ASML", "TSM", "NVDA"] else 18.0,
-        "eps_fwd": 24.0,
-        "ret_6m": 42.0,
-        "ret_1m": 3.8,
-        "buy_pct": 85.0,
+        "price": p or float(m.get("prevClosePrice") or 100.0),
+        "beta": beta,
+        "net_margin": net_margin,
+        "eps_fwd": eps_fwd,
+        "ret_6m": ret_6m,
+        "ret_1m": ret_1m,
+        "buy_pct": buy_pct,
         "rsi": rsi or 56.0,
         "has_earnings_risk": is_earnings_within_48h(ticker),
         "surveillance_clean": True,
-        "dbt_eqt": 0.40,
+        "dbt_eqt": float(m.get("dbt_eqt") or 0.40),
         "market": "US"
     }
     return deliberate_candidate(candidate)
