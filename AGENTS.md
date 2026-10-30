@@ -18,7 +18,7 @@ Every dollar and rupee allocated represents hard-earned salary and a long-term g
 * **Institutional Titans Only**: Market capitalization floor $\ge \$20\text{ Billion (US)}$ / $\ge ₹2,000\text{ Crore (IN)}$. Never buy micro-caps, penny stocks, or illiquid post-IPO hype traps.
 * **Bounded High-Beta ($1.40 \le \beta \le 2.80$)**: High sensitivity to secular bull runs, but hard-capped at 2.80 to prevent ruin from erratic speculative swings.
 * **Anti-Churn Tenure Lock**: Assets held for $< 60$ days are **immune** from discretionary rotation, eliminating fee drag (1.17% round-trip) and Indian Short-Term Capital Gains tax (31.2% on foreign equities, 20% on domestic equities).
-* **Concentrated Conviction**: Maximum 3 total active portfolio holdings per market. If capacity is full, fresh cash tops up retained leaders.
+* **Concentrated Conviction**: Maximum 5 total active portfolio holdings per market. If capacity is full, fresh cash tops up retained leaders.
 
 ---
 

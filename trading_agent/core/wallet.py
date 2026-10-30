@@ -133,12 +133,14 @@ def topup_active_holdings(mode: str = "balanced", execute: bool = False) -> Dict
         return {"status": "INSUFFICIENT_FUNDS", "available": avail}
 
     _, holdings = audit_portfolio_health(token)
-    active_tickers = ["MU", "TSM", "ASML"]
-    active_map = {h["ticker"]: h for h in holdings if h["ticker"] in active_tickers}
+    active_map = {h["ticker"]: h for h in holdings if float(h.get("current", 0.0)) > 1.0}
+    active_tickers = list(active_map.keys())
+    if not active_tickers:
+        active_tickers = [h["ticker"] for h in holdings]
 
-    for t in active_tickers:
-        if t not in active_map:
-            active_map[t] = {"ticker": t, "current": 0.0, "invested": 0.0, "pnl_pct": 0.0}
+    if not active_tickers:
+        print("[!] No active holdings found to top up.")
+        return {"status": "NO_ACTIVE_HOLDINGS", "available": avail}
 
     total_current_equity = sum(h["current"] for h in active_map.values())
     total_capital = total_current_equity + avail

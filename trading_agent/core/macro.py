@@ -9,7 +9,7 @@ Analyzes:
 
 import json
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .broker import call_tickertape_mcp
 from .auth import get_tickertape_token
@@ -106,7 +106,7 @@ def audit_us_market_regime(token: Optional[str] = None) -> Dict[str, Any]:
     ]
 
     return {
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "regime_title": regime_title,
         "regime_tone": regime_tone,
         "quotes": quotes,

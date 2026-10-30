@@ -8,7 +8,7 @@ Fiduciary Anti-Ruin Mandate compliance, and test-time reasoning fidelity.
 import os
 import sys
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, REPO_ROOT)
@@ -18,7 +18,7 @@ from tests.test_agent_evals import TestAgenticEvals
 def run_agentic_evals():
     print("=" * 80)
     print(" [SOTA AGENTIC EVALUATION & ADVERSARIAL BENCHMARK SUITE - 2026]")
-    print(f" Execution Timestamp: {datetime.utcnow().isoformat()}Z")
+    print(f" Execution Timestamp: {datetime.now(timezone.utc).isoformat()}")
     print(" Framework: PyUnit + Pydantic v2 + Fiduciary Anti-Ruin Mandate")
     print("=" * 80)
 

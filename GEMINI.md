@@ -54,7 +54,7 @@ Strictly adhere to the **Max-2 Interactions Contract** (Zero user choosing, zero
 1. **Strict Positive Net Margin Floor**: Any company with Net Margin $\le 0\%$ or operating losses is **STRICTLY DISQUALIFIED / VETOED**. No hard-earned capital may ever flow to a cash-burning business.
 2. **Institutional Market Cap Floor ($\ge \$20\text{B US} / \ge ₹2,000\text{Cr IN}$)**: We only invest in deeply liquid, institutionally sponsored titans with unassailable economic moats. No fragile penny stocks or illiquid small-caps.
 3. **Bounded Beta Sweet Spot ($1.40 \le \text{Beta} \le 2.80$)**: We enforce high market sensitivity ($\ge 1.40$) to outcompete benchmarks during bull runs, but hard-cap beta at $\le 2.80$ to eliminate erratic post-IPO speculation.
-4. **Concentrated Conviction**: Maximum 2 new assets per cycle, capped at $\le 3$ total active portfolio holdings per market.
+4. **Concentrated Conviction**: Maximum 2 new assets per cycle, capped at $\le 5$ total active portfolio holdings per market.
 5. **60-Day Anti-Churn Tenure Lock**: Assets held for $< 60$ days cannot be sold for discretionary rebalancing churn, saving 1.17% round-trip fees and 31.2% Indian STCG tax on US foreign equities.
 6. **48-Hour Earnings Proximity Safeguard**: Deducts score penalties if an asset reports quarterly earnings within $\pm 48\text{h}$ to prevent binary post-earnings gap-down.
 7. **No Falling Knives**: Assets trading below their 200-day simple moving average ($\text{Price} < \text{SMA}_{200}$) are disqualified from fresh accumulation.

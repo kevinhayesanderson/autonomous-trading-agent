@@ -5,7 +5,7 @@ Committee Consensus, Risk Audits, and MCP Tool payloads.
 """
 
 from typing import List, Dict, Any, Optional, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     from pydantic import BaseModel, Field, field_validator
@@ -82,7 +82,7 @@ class CommitteeDeliberation(BaseModel):
     Enforces test-time reasoning traces and deterministic quorum rules.
     """
     ticker: str = Field(..., description="Stock ticker under deliberation")
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat(), description="UTC timestamp")
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat(), description="UTC timestamp")
     recommendation: Literal["BUY", "HOLD", "VETO"] = Field(..., description="Final committee consensus")
     confidence_score: float = Field(..., ge=0.0, le=1.0, description="Confidence score from 0.0 to 1.0")
     buy_votes: int = Field(..., ge=0, le=3, description="Count of BUY votes from specialist agents")
@@ -128,7 +128,7 @@ class TargetAllocation(BaseModel):
     reason: str
 
 class RebalancePlan(BaseModel):
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     withdrawable_cash_usd: float
     recyclable_capital_usd: float
     total_deployment_budget_usd: float

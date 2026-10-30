@@ -340,12 +340,9 @@ def deliberate_ticker(ticker: str, token: Optional[str] = None, candidate_data: 
     # Dynamic metric extraction from candidate_data if provided
     cd = candidate_data or {}
     m = cd.get("metrics", cd.get("factors", cd))
-    beta = float(m.get("beta") or (1.75 if ticker in ["ASML", "NVDA", "TSM", "MRVL"] else 1.50))
+    beta = float(m.get("beta") or 1.50)
     raw_nm = float(m.get("profitMarginPercent,100,*") or m.get("profitMarginPercent") or m.get("net_margin") or 0.0)
-    if raw_nm != 0.0:
-        net_margin = raw_nm * 100.0 if (0.0 < abs(raw_nm) <= 1.0) else raw_nm
-    else:
-        net_margin = 28.5 if ticker in ["ASML", "TSM", "NVDA"] else 18.0
+    net_margin = float(raw_nm * 100.0 if (0.0 < abs(raw_nm) <= 1.0) else (raw_nm if raw_nm != 0.0 else 18.0))
     eps_fwd = float(m.get("forecastEpsGrowthPercent") or m.get("eps_fwd") or 24.0)
     ret_6m = float(m.get("6MReturn,100,*") or m.get("ret_6m") or 42.0)
     ret_1m = float(m.get("1MReturn,100,*") or m.get("ret_1m") or 3.8)

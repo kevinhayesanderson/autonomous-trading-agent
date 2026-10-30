@@ -71,11 +71,14 @@ class TestMCPToolsCoverage(unittest.TestCase):
         "trading_get_memory_state",
         "trading_run_system_test",
         "trading_run_agent_evals",
+        "trading_audit_immune_system",
+        "trading_run_self_learning_cycle",
+        "trading_get_market_regime",
     ]
 
-    def test_all_nine_tools_metadata_and_hints_conformance(self):
-        """Verify that exactly 9 tools are declared with all 4 hints as strict booleans."""
-        self.assertEqual(len(TOOL_METADATA), 9, "Server must expose exactly 9 MCP tools")
+    def test_all_tools_metadata_and_hints_conformance(self):
+        """Verify that all 12 tools are declared with all 4 hints as strict booleans."""
+        self.assertEqual(len(TOOL_METADATA), 12, "Server must expose exactly 12 MCP tools")
         
         for name in self.EXPECTED_TOOL_NAMES:
             self.assertIn(name, TOOL_METADATA, f"Tool {name} missing from TOOL_METADATA")

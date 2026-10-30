@@ -15,10 +15,10 @@
 [![System Verification](https://img.shields.io/badge/Self--Test-7%2F7%20Passing-success.svg)]()
 
 Institutional-grade, multi-agent quantitative trading system engineered for **systematic capital allocation across dual global markets**:
-1. **US Equities**: High-beta semiconductor and technology infrastructure compounders via **Tickertape / DriveWealth** (live fractional execution) and **Alpaca** (paper shadow sandbox).
+1. **US Equities**: Whole-market secular compounders across S&P 500, NASDAQ 100, and Dow Jones (enterprise hardware, cloud infrastructure, cybersecurity, defense AI, and semiconductor leaders) via **Tickertape / DriveWealth** (live fractional execution) and **Alpaca** (paper shadow sandbox).
 2. **Indian Equities**: Secular capex, industrial manufacturing, and power infrastructure leaders via **Zerodha Kite Connect v3** (live delivery cash CNC & GTT brackets) and **Tickertape PRO India**.
 
-AQTA features test-time compute with extended reasoning traces, strict Pydantic v2 grammar-enforced schemas, native Model Context Protocol (MCP 2.x) integration, and an immutable Git-synced memory ledger.
+AQTA features the **Anti-Blunder Immune System** (10 Cardinal Invariants), **Continuous Monthly Self-Learning Engine** (adaptive factor calibration), test-time compute with extended reasoning traces, strict Pydantic v2 schemas, native Model Context Protocol (MCP 2.x), and an immutable Git-synced memory ledger.
 
 ---
 
@@ -123,7 +123,7 @@ Every dollar and rupee allocated represents hard-earned salary. The system conce
 | **Institutional Market Cap Floor** | $\ge \$20\text{B (US)} / \ge ₹2,000\text{Cr (IN)}$ | Eliminates illiquid penny stocks, micro-caps, and post-IPO traps. |
 | **Bounded High-Beta Collar** | $1.40 \le \beta \le 2.80$ | High market sensitivity for alpha, hard-capped to eliminate speculative volatility. |
 | **Anti-Falling Knife Baseline** | $\text{Price} \ge \text{SMA}_{200}$ | Disqualifies assets in secular structural downtrends. |
-| **Concentrated Conviction Cap** | $\le 3\text{ Active Assets per Market}$ | Maximum 2 new assets per cycle, capped at 3 total holdings to prevent fee drag. |
+| **Concentrated Conviction Cap** | $\le 5\text{ Active Assets per Market}$ | Maximum 2 new assets per cycle, capped at 5 total holdings to maintain high-beta concentration without artificial lockouts. |
 | **60-Day Anti-Churn Tenure Lock** | $\text{Tenure} \ge 60\text{ Days}$ | Protects recent holdings from momentum churn, saving 1.17% fees and 31.2% Indian STCG. |
 | **48-Hour Earnings Proximity** | $\text{Penalty}: -25\text{ Points}$ | Dynamic score reduction if quarterly earnings report within $\pm 48\text{h}$ (avoids binary gap-downs). |
 | **50% Wallet-Drain Regulator** | $\text{Tranche} \le 0.49 \times \text{Cash}$ | Complies with DriveWealth's rolling 60-min safety rule (`WALLET_DRAIN_LIMIT_EXCEEDED`). |
@@ -268,8 +268,11 @@ python agent.py run --execute       # Live dual-market execution across both bro
 python agent.py status              # Real-time balances, demat holdings, P&L, and LRS status
 ```
 
-### Analysis & Deliberation
+### Analysis, Immune System & Continuous Evolution
 ```bash
+python agent.py immune              # Audit portfolio against 10 Cardinal Anti-Blunder Invariants
+python agent.py learn               # Run monthly self-learning cycle & adapt factor weights
+python agent.py market              # Macro regime audit & Generational Opportunity radar
 python agent.py debate ASML         # Run multi-agent committee debate on any ticker
 python agent.py retrospective       # Run Phase 0 adversarial review & factor calibration
 python agent.py in-screen           # Algorithmic screener across 5,000+ Indian stocks

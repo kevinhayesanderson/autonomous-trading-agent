@@ -5,7 +5,7 @@ into token-efficient, cached context windows for frontier LLM reasoning.
 """
 
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Curated High-Beta Monopolistic Deep-Tech Dossiers (Pre-cached context representations)
 CURATED_MONOPOLY_DOSSIERS: Dict[str, Dict[str, Any]] = {
@@ -112,7 +112,7 @@ def get_cached_fundamental_dossier(ticker: str) -> Dict[str, Any]:
         ],
         "sec_10k_metrics": {
             "net_margin_status": "Screened for positive net margin compliance",
-            "retrieval_timestamp": datetime.utcnow().isoformat()
+            "retrieval_timestamp": datetime.now(timezone.utc).isoformat()
         }
     }
 

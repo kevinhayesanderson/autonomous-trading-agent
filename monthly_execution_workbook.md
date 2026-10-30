@@ -97,7 +97,7 @@ The agent automatically classifies account funding status:
 ### Tenure Lock Economics:
 - Selling an asset held $< 60$ days creates broker exit fees, currency friction, and 31.2% Indian Short-Term Capital Gains (STCG) tax drag on foreign equities (20% on domestic equities).
 - **Rule**: No asset held $< 60$ days can be replaced for discretionary momentum turnover. Only a breached Stop-Loss (-12%) or Take-Profit (+35%) collar forces an exit before 60 days.
-- When holding capacity ($\le 3$ assets) is reached and assets are locked, fresh capital proportionally tops up existing leaders.
+- When holding capacity ($\le 5$ assets) is reached and assets are locked, fresh capital systematically flows into the highest-scoring leaders.
 
 ---
 
