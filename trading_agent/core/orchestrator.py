@@ -143,6 +143,17 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
         print(f"  [!] Dynamic Macro & Opportunity scan notice: {e}")
 
     # =========================================================================
+    # STEP 2.6: AQTA ANTI-BLUNDER IMMUNE SYSTEM AUDIT
+    # =========================================================================
+    try:
+        from .immune_system import audit_anti_blunder_immune_system, format_immune_system_report
+        all_holdings = us_holdings + zerodha_holdings
+        immune_audit = audit_anti_blunder_immune_system(active_holdings=all_holdings)
+        print("\n" + format_immune_system_report(immune_audit))
+    except Exception as e:
+        print(f"  [!] Anti-blunder immune audit notice: {e}")
+
+    # =========================================================================
     # STEP 3: UNBIASED WHOLE-MARKET SCREENING (BOTH MARKETS)
     # =========================================================================
     print("\n[STEP 3] Objective Whole-Market Quantitative Screening (Zero Stock-Fitting Bias)...")
@@ -470,7 +481,15 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     except Exception as e:
         print(f"  [!] Note on Watchlist sync: {e}")
 
-    # Synchronize Git repository and trade ledger
+    # 6.3 Execute Continuous Monthly Self-Learning & Retrospective Cycle
+    try:
+        from .learning import run_monthly_self_learning_cycle
+        print("\n[*] Synthesizing monthly self-learning cycle and updating memory...")
+        run_monthly_self_learning_cycle(cycle_id=cycle_str, is_live=True)
+    except Exception as e:
+        print(f"  [!] Self-learning cycle notice: {e}")
+
+    # Synchronize Git repository, factor weights, and trade ledger
     try:
         from scripts.git_sync import sync_system_to_git
         sync_system_to_git(f"Cycle {cycle_str}: Unified dual-market execution & trade ledger sync")

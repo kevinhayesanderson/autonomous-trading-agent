@@ -122,10 +122,26 @@ def cmd_drain(args):
     drain_wallet_to_asset(ticker=ticker)
 
 def cmd_retrospective(args):
-    """Runs automated Phase 0 adversarial review & factor tuning."""
+    """Runs automated continuous self-learning, adversarial review & factor tuning."""
+    from trading_agent.core.learning import run_monthly_self_learning_cycle
+    is_live = getattr(args, "live", True)
+    cycle_id = getattr(args, "cycle", None)
+    run_monthly_self_learning_cycle(cycle_id=cycle_id, is_live=is_live)
+
+def cmd_immune(args):
+    """Audits the AQTA Anti-Blunder Immune System across active holdings and invariants."""
+    from trading_agent.core.immune_system import audit_anti_blunder_immune_system, format_immune_system_report
     token = get_tickertape_token()
     _, summary = audit_portfolio_health(token)
-    run_adversarial_retrospective(summary, is_preview=False)
+    audit_data = audit_anti_blunder_immune_system(active_holdings=summary)
+    print(format_immune_system_report(audit_data))
+
+def cmd_learn(args):
+    """Executes continuous self-learning, post-mortem synthesis, and factor evolution."""
+    from trading_agent.core.learning import run_monthly_self_learning_cycle
+    is_live = getattr(args, "live", True)
+    cycle_id = getattr(args, "cycle", None)
+    run_monthly_self_learning_cycle(cycle_id=cycle_id, is_live=is_live)
 
 def cmd_test(args):
     """Runs the 7-test self-verification suite."""
@@ -415,8 +431,15 @@ def cli_entrypoint():
     p_drain = subparsers.add_parser("drain", help="Drain settled cash into target leader respecting wallet safety")
     p_drain.add_argument("--ticker", default="ASML", help="Target ticker symbol (default: ASML)")
 
-    # retrospective
-    p_retro = subparsers.add_parser("retrospective", help="Run adversarial retrospective and factor weight tuning")
+    # retrospective / learn / evolve
+    for r_cmd in ["retrospective", "learn", "evolve"]:
+        p_retro = subparsers.add_parser(r_cmd, help="Run continuous self-learning, retrospective synthesis, and factor evolution")
+        p_retro.add_argument("--cycle", default=None, help="Target cycle ID (e.g. 2026-10)")
+        p_retro.add_argument("--live", action="store_true", default=True, help="Persist learned weights and retrospective to disk")
+
+    # immune / audit-immune / audit-blunders
+    for imm_cmd in ["immune", "audit-immune", "audit-blunders"]:
+        subparsers.add_parser(imm_cmd, help="Audit the 10 cardinal Anti-Blunder invariants and active holdings")
 
     # test
     p_test = subparsers.add_parser("test", help="Run 7-test mathematical and safety verification suite")
@@ -487,6 +510,11 @@ def cli_entrypoint():
         "execute": cmd_execute,
         "drain": cmd_drain,
         "retrospective": cmd_retrospective,
+        "learn": cmd_learn,
+        "evolve": cmd_learn,
+        "immune": cmd_immune,
+        "audit-immune": cmd_immune,
+        "audit-blunders": cmd_immune,
         "test": cmd_test,
         "sync": cmd_sync,
         "serve-mcp": cmd_serve_mcp,

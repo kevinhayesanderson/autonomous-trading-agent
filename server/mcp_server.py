@@ -29,6 +29,8 @@ from trading_agent.core.memory import load_factor_weights, load_trade_journal, r
 from trading_agent.core.wallet import drain_wallet_to_asset
 from trading_agent.core.deliberation import deliberate_ticker
 from trading_agent.core.macro import audit_us_market_regime, scan_generational_asymmetry_opportunities
+from trading_agent.core.immune_system import audit_anti_blunder_immune_system
+from trading_agent.core.learning import run_monthly_self_learning_cycle
 from trading_agent.core.config import (
     MIN_BETA_INVARIANT,
     MAX_BETA_COLLAR,
@@ -133,6 +135,22 @@ TOOL_METADATA = {
         "readOnlyHint": True,
         "destructiveHint": False,
         "idempotentHint": True,
+        "openWorldHint": True,
+    },
+    "trading_audit_immune_system": {
+        "title": "Audit Anti-Blunder Immune System",
+        "description": "Audits the portfolio and pipeline against all 10 cardinal Anti-Blunder invariants and failure modes.",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    },
+    "trading_run_self_learning_cycle": {
+        "title": "Run Monthly Self-Learning Cycle",
+        "description": "Executes continuous monthly self-learning, analyzes trade attribution, adapts factor model weights, and logs retrospectives.",
+        "readOnlyHint": False,
+        "destructiveHint": True,
+        "idempotentHint": False,
         "openWorldHint": True,
     },
 }
@@ -274,6 +292,22 @@ def handle_get_market_regime() -> Dict[str, Any]:
         "sale_radar_opportunities": opportunities
     }
 
+def handle_audit_immune_system() -> Dict[str, Any]:
+    token = get_tickertape_token()
+    _, summary = audit_portfolio_health(token)
+    audit_data = audit_anti_blunder_immune_system(active_holdings=summary)
+    return {
+        "status": "success",
+        "immune_audit": audit_data
+    }
+
+def handle_run_self_learning_cycle(cycle_id: Optional[str] = None, live: bool = True) -> Dict[str, Any]:
+    res = run_monthly_self_learning_cycle(cycle_id=cycle_id, is_live=live)
+    return {
+        "status": "success",
+        "result": res
+    }
+
 # =============================================================================
 # MODERN MCP 2.x INITIALIZATION
 # =============================================================================
@@ -382,6 +416,26 @@ if USE_OFFICIAL_MCP:
         """Analyzes the current US market regime and scans for once-in-a-lifetime valuation dislocations ('The Sale Radar')."""
         return json.dumps(handle_get_market_regime(), indent=2)
 
+    @mcp_app.tool(
+        name="trading_audit_immune_system",
+        title="Audit Anti-Blunder Immune System",
+        description="Audits the portfolio and pipeline against all 10 cardinal Anti-Blunder invariants and failure modes.",
+        annotations=make_annotations("trading_audit_immune_system")
+    )
+    def trading_audit_immune_system() -> str:
+        """Audits the portfolio and pipeline against all 10 cardinal Anti-Blunder invariants and failure modes."""
+        return json.dumps(handle_audit_immune_system(), indent=2)
+
+    @mcp_app.tool(
+        name="trading_run_self_learning_cycle",
+        title="Run Monthly Self-Learning Cycle",
+        description="Executes continuous monthly self-learning, analyzes trade attribution, adapts factor model weights, and logs retrospectives.",
+        annotations=make_annotations("trading_run_self_learning_cycle")
+    )
+    def trading_run_self_learning_cycle(cycle_id: Optional[str] = None, live: bool = True) -> str:
+        """Executes continuous monthly self-learning, analyzes trade attribution, adapts factor model weights, and logs retrospectives."""
+        return json.dumps(handle_run_self_learning_cycle(cycle_id=cycle_id, live=live), indent=2)
+
     # 2. Resources Registration
     @mcp_app.resource("resource://portfolio/status")
     def get_portfolio_status_resource() -> str:
@@ -409,6 +463,16 @@ if USE_OFFICIAL_MCP:
     def get_market_regime_resource() -> str:
         """Dynamic US macro market regime and Generational Opportunity Sale Radar."""
         return json.dumps(handle_get_market_regime(), indent=2)
+
+    @mcp_app.resource("resource://portfolio/immune_system")
+    def get_immune_system_resource() -> str:
+        """Anti-Blunder Immune System status and 10 cardinal invariants audit."""
+        return json.dumps(handle_audit_immune_system(), indent=2)
+
+    @mcp_app.resource("resource://portfolio/learnings")
+    def get_learnings_resource() -> str:
+        """Latest monthly self-learning retrospective and empirical insights."""
+        return json.dumps(handle_run_self_learning_cycle(live=False), indent=2)
 
     # 3. Prompts Registration
     @mcp_app.prompt()

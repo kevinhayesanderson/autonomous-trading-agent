@@ -148,11 +148,15 @@ python agent.py kite-status
 | `trading_run_system_test` | None | Runs 7-phase mathematical verification suite |
 | `trading_run_agent_evals` | None | Runs 2026 SOTA agentic evaluation & fiduciary benchmark suite |
 | `trading_get_market_regime` | None | US macro regime analysis & Generational Asymmetry Sale Radar |
+| `trading_audit_immune_system` | None | Audits portfolio against 10 cardinal Anti-Blunder invariants |
+| `trading_run_self_learning_cycle` | `cycle_id`, `live` | Runs continuous monthly self-learning, adapts factor weights, & logs retrospectives |
 
 #### Resources (`resources/list` & `resources/read`)
 * `resource://portfolio/status`: Real-time JSON snapshot of portfolio holdings, settled cash, and stop-loss/take-profit status.
 * `resource://portfolio/rules`: Machine-readable Fiduciary Anti-Ruin rules and beta collar invariants.
 * `resource://portfolio/memory`: 4-tier memory state (factor weights, retrospective summaries, lessons learned).
+* `resource://portfolio/immune_system`: Anti-Blunder Immune System status and invariant audit.
+* `resource://portfolio/learnings`: Monthly self-learning retrospective, empirical lessons, and factor adaptations.
 * `resource://market/regime`: Dynamic US macro market regime and Generational Opportunity Sale Radar.
 
 #### Prompts (`prompts/list` & `prompts/get`)
