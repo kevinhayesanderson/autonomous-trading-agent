@@ -1,6 +1,6 @@
 {
-  "version": "2.6.1",
-  "last_calibrated_at": "2026-10-30T19:25:27.808763",
+  "version": "2.6.2",
+  "last_calibrated_at": "2026-10-30T20:05:06.819551",
   "calibration_cycle": "2026-09",
   "theme": "High-Risk, High-Return Quantitative Momentum & Compute Infrastructure",
   "fiduciary_mandate": {
@@ -21,16 +21,16 @@
     "min_market_cap_billions": 20.0
   },
   "current_weights": {
-    "weight_6m_return": 0.37,
+    "weight_6m_return": 0.39,
     "weight_1m_return": 0.15,
     "weight_beta": 20.0,
     "beta_clamp_max": 2.5,
-    "weight_fwd_eps": 0.181,
+    "weight_fwd_eps": 0.201,
     "fwd_eps_cap": 250.0,
     "weight_analyst_upside": 0.15,
     "weight_analyst_buy_pct": 0.15,
     "rsi_overbought_threshold": 75.0,
-    "rsi_overbought_penalty": -17.0,
+    "rsi_overbought_penalty": -19.0,
     "rsi_oversold_threshold": 35.0,
     "rsi_oversold_boost": 10.0,
     "earnings_proximity_penalty": -25.0
@@ -364,6 +364,26 @@
         "weight_analyst_buy_pct": 0.15,
         "rsi_overbought_threshold": 75.0,
         "rsi_overbought_penalty": -17.0,
+        "rsi_oversold_threshold": 35.0,
+        "rsi_oversold_boost": 10.0,
+        "earnings_proximity_penalty": -25.0
+      }
+    },
+    {
+      "version": "2.6.2",
+      "calibrated_at": "2026-10-30T20:05:06.819551",
+      "reason": "Stop-loss executed cleanly: Hardened RSI overbought penalty to prevent chasing late-stage rallies. | Positive active alpha (+1.85%): Reinforced 6M secular momentum weight.",
+      "weights": {
+        "weight_6m_return": 0.39,
+        "weight_1m_return": 0.15,
+        "weight_beta": 20.0,
+        "beta_clamp_max": 2.5,
+        "weight_fwd_eps": 0.201,
+        "fwd_eps_cap": 250.0,
+        "weight_analyst_upside": 0.15,
+        "weight_analyst_buy_pct": 0.15,
+        "rsi_overbought_threshold": 75.0,
+        "rsi_overbought_penalty": -19.0,
         "rsi_oversold_threshold": 35.0,
         "rsi_oversold_boost": 10.0,
         "earnings_proximity_penalty": -25.0
