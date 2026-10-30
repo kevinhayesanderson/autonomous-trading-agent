@@ -129,15 +129,46 @@ def evaluate_portfolio_rebalance(
     print(f"  * Proceeds from Sells:   ${freed_cash:.2f} USD")
     print(f"  * Total Rebalance Pool:  ${total_rebalance_pool:.2f} USD (Net Spendable: ${net_spendable:.2f} after fees & buffer)")
 
-    # Step 4: Determine Target Buys obeying Concentration Cap (<= 3 positions)
+    # Step 4: Determine Target Buys obeying Concentration Cap (<= 5 positions)
     available_slots = max(0, MAX_PORTFOLIO_ASSETS - len(retained_holdings))
     target_buys = []
 
-    if available_slots == 0:
-        # Portfolio is already full of high-conviction retained holdings: Top up retained leaders!
-        print("\n  --- [3. Capacity Full: Top-Up Retained Holdings] ---")
-        split_buy_amt = round(net_spendable / len(retained_holdings), 2) if retained_holdings else 0.0
+    # Priority: Deploy fresh uncommitted capital into top-scoring screened candidates
+    # If a top candidate is already held (e.g. MU), it represents a high-conviction top-up.
+    # If a top candidate is new (e.g. DELL), it represents an approved fresh entry.
+    candidates_to_buy = top_candidates[:min(max(available_slots, 2), 2)]
+
+    if candidates_to_buy and (available_slots > 0 or any(c["ticker"] in [rh["ticker"] for rh in retained_holdings] for c in candidates_to_buy)):
+        split_buy_amt = round(net_spendable / len(candidates_to_buy), 2)
+        print("\n  --- [3. Target Buy Allocations (Objective Screener Leaders)] ---")
+        for c in candidates_to_buy:
+            t = c["ticker"]
+            q_val = c.get("consensus_q", c.get("q_score", 0.0))
+            is_already_held = t in [rh["ticker"] for rh in retained_holdings]
+            label = "TOP-UP" if is_already_held else "BUY"
+            target_buys.append({
+                "ticker": t,
+                "name": c.get("name", t),
+                "price": c.get("price", 0.0),
+                "amount": split_buy_amt,
+                "q_score": q_val,
+                "is_top_up": is_already_held
+            })
+            print(f"  * {label} {t:<5} (${c.get('name', '')[:25]}): ${split_buy_amt:.2f} USD (Consensus Score: {q_val:.2f})")
+    elif available_slots == 0:
+        # If capacity is full, allocate fresh capital strictly into the highest-scoring screener leaders that are already held
+        print("\n  --- [3. Capacity Full: Conviction Top-Up on Highest-Scoring Retained Leader(s)] ---")
+        scored_retained = []
         for rh in retained_holdings:
+            t = rh["ticker"]
+            matching_cand = next((c for c in top_candidates if c.get("ticker") == t), None)
+            q_score = matching_cand.get("consensus_q", matching_cand.get("q_score", rh.get("holding_q", 50.0))) if matching_cand else rh.get("holding_q", 50.0)
+            scored_retained.append((rh, q_score))
+        scored_retained.sort(key=lambda x: x[1], reverse=True)
+        top_retained_to_fund = [sr[0] for sr in scored_retained[:min(2, len(scored_retained))]]
+        
+        split_buy_amt = round(net_spendable / len(top_retained_to_fund), 2) if top_retained_to_fund else 0.0
+        for rh in top_retained_to_fund:
             t = rh["ticker"]
             target_buys.append({
                 "ticker": t,
@@ -147,38 +178,21 @@ def evaluate_portfolio_rebalance(
                 "q_score": rh.get("holding_q", 50.0),
                 "is_top_up": True
             })
-            print(f"  * TOP-UP {t:<5}: ${split_buy_amt:.2f} USD (Retained Leader, Score: {rh.get('holding_q', 50.0):.1f})")
+            print(f"  * TOP-UP {t:<5}: ${split_buy_amt:.2f} USD (Highest Scoring Retained Leader, Score: {rh.get('holding_q', 50.0):.1f})")
     else:
-        # Open slots: Buy top new candidate(s)
-        candidates_to_buy = top_candidates[:min(available_slots, 2)]
-        if not candidates_to_buy and retained_holdings:
-            print("\n  --- [3. Fallback: Top-Up Retained Holdings (Zero Limbo)] ---")
-            split_buy_amt = round(net_spendable / len(retained_holdings), 2)
-            for rh in retained_holdings:
-                t = rh["ticker"]
-                target_buys.append({
-                    "ticker": t,
-                    "name": t,
-                    "price": 0.0,
-                    "amount": split_buy_amt,
-                    "q_score": rh.get("holding_q", 50.0),
-                    "is_top_up": True
-                })
-                print(f"  * TOP-UP {t:<5}: ${split_buy_amt:.2f} USD (Retained Leader, Score: {rh.get('holding_q', 50.0):.1f})")
-        else:
-            split_buy_amt = round(net_spendable / len(candidates_to_buy), 2) if candidates_to_buy else 0.0
-            print("\n  --- [3. Target Buy Allocations (Concentrated Conviction Basket)] ---")
-            for c in candidates_to_buy:
-                q_val = c.get("consensus_q", c.get("q_score", 0.0))
-                target_buys.append({
-                    "ticker": c["ticker"],
-                    "name": c.get("name", c["ticker"]),
-                    "price": c.get("price", 0.0),
-                    "amount": split_buy_amt,
-                    "q_score": q_val,
-                    "is_top_up": False
-                })
-                print(f"  * BUY {c['ticker']:<5} (${c.get('name', '')[:25]}): ${split_buy_amt:.2f} USD (Consensus Score: {q_val:.2f})")
+        split_buy_amt = round(net_spendable / len(candidates_to_buy), 2) if candidates_to_buy else 0.0
+        print("\n  --- [3. Target Buy Allocations (Concentrated Conviction Basket)] ---")
+        for c in candidates_to_buy:
+            q_val = c.get("consensus_q", c.get("q_score", 0.0))
+            target_buys.append({
+                "ticker": c["ticker"],
+                "name": c.get("name", c["ticker"]),
+                "price": c.get("price", 0.0),
+                "amount": split_buy_amt,
+                "q_score": q_val,
+                "is_top_up": False
+            })
+            print(f"  * BUY {c['ticker']:<5} (${c.get('name', '')[:25]}): ${split_buy_amt:.2f} USD (Consensus Score: {q_val:.2f})")
 
     return {
         "rebalance_actions": rebalance_actions,

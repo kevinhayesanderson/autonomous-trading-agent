@@ -14,7 +14,7 @@
   "hard_invariants": {
     "min_beta": 1.4,
     "max_beta": 2.8,
-    "max_assets": 3,
+    "max_assets": 5,
     "min_momentum_weight": 0.25,
     "max_fee_drag_pct": 0.5,
     "strict_positive_net_margin": true,

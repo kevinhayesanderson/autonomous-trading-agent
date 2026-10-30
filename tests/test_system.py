@@ -37,7 +37,7 @@ class TestAIAgenticSystem(unittest.TestCase):
         min_mom = invariants.get("min_momentum_weight", 0.0)
 
         self.assertGreaterEqual(min_beta, 1.40, f"Invariant violation: Beta floor {min_beta} < 1.40")
-        self.assertLessEqual(max_assets, 3, f"Invariant violation: Max assets {max_assets} > 3")
+        self.assertLessEqual(max_assets, 5, f"Invariant violation: Max assets {max_assets} > 5")
         self.assertGreaterEqual(min_mom, 0.20, f"Invariant violation: Momentum weight {min_mom} < 0.20")
 
     def test_02_earnings_proximity_guardrail(self):

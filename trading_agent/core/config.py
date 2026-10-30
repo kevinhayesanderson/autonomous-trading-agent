@@ -48,7 +48,7 @@ ALPACA_BASE_URL = os.environ.get("ALPACA_BASE_URL", "https://paper-api.alpaca.ma
 AV_API_KEY = os.environ.get("AV_API_KEY", "")
 
 # Quantitative Fiduciary Constants & Hard Collars
-MAX_PORTFOLIO_ASSETS = 3
+MAX_PORTFOLIO_ASSETS = 5
 MIN_BETA_INVARIANT = 1.40
 MIN_BETA_COLLAR = 1.40
 MAX_BETA_COLLAR = 2.80
