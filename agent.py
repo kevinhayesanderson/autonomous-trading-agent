@@ -138,6 +138,14 @@ def cmd_sync(args):
     msg = args.message or f"Cycle {datetime.now().strftime('%Y-%m')}: Agent state & memory synchronization"
     sync_system_to_git(msg)
 
+def cmd_market(args):
+    """Audits US market regime, what happened, current state, forward outlook, and generational opportunities."""
+    from trading_agent.core.macro import audit_us_market_regime, scan_generational_asymmetry_opportunities, format_macro_and_opportunity_report
+    token = get_tickertape_token()
+    regime = audit_us_market_regime(token)
+    opps = scan_generational_asymmetry_opportunities(token)
+    print(format_macro_and_opportunity_report(regime, opps))
+
 def cmd_debate(args):
     """Executes SOTA Multi-Agent Deliberation on a ticker with test-time reasoning traces."""
     from trading_agent.core.deliberation import deliberate_ticker
@@ -420,6 +428,10 @@ def cli_entrypoint():
     # serve-mcp
     p_mcp = subparsers.add_parser("serve-mcp", help="Launch native Model Context Protocol (MCP) server")
 
+    # market / radar / opportunities
+    for m_cmd in ["market", "radar", "opportunities"]:
+        subparsers.add_parser(m_cmd, help="Audit live US market regime, what happened, current state, and generational sale radar")
+
     # in-screen
     p_in_screen = subparsers.add_parser("in-screen", help="Algorithmic multi-factor screener across Indian equities (NSE/BSE)")
     p_in_screen.add_argument("--min-beta", type=float, default=1.40, help="Minimum Beta (default: 1.40)")
@@ -478,6 +490,9 @@ def cli_entrypoint():
         "test": cmd_test,
         "sync": cmd_sync,
         "serve-mcp": cmd_serve_mcp,
+        "market": cmd_market,
+        "radar": cmd_market,
+        "opportunities": cmd_market,
         "in-screen": cmd_in_screen,
         "in-audit": cmd_in_audit,
         "in-preview": cmd_in_preview,

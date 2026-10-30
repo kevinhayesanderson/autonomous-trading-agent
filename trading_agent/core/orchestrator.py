@@ -132,6 +132,17 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     run_adversarial_retrospective(zerodha_holdings, benchmark_ret=1.80, is_preview=(not execute), market="IN")
 
     # =========================================================================
+    # STEP 2.5: DYNAMIC US MACRO REGIME & GENERATIONAL OPPORTUNITY SCANNER
+    # =========================================================================
+    try:
+        from .macro import audit_us_market_regime, scan_generational_asymmetry_opportunities, format_macro_and_opportunity_report
+        macro_regime = audit_us_market_regime(tt_token)
+        asymmetry_opps = scan_generational_asymmetry_opportunities(tt_token)
+        print("\n" + format_macro_and_opportunity_report(macro_regime, asymmetry_opps))
+    except Exception as e:
+        print(f"  [!] Dynamic Macro & Opportunity scan notice: {e}")
+
+    # =========================================================================
     # STEP 3: UNBIASED WHOLE-MARKET SCREENING (BOTH MARKETS)
     # =========================================================================
     print("\n[STEP 3] Objective Whole-Market Quantitative Screening (Zero Stock-Fitting Bias)...")

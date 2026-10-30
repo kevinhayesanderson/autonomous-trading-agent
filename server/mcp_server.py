@@ -28,6 +28,7 @@ from trading_agent.core.engine import run_pipeline
 from trading_agent.core.memory import load_factor_weights, load_trade_journal, run_adversarial_retrospective
 from trading_agent.core.wallet import drain_wallet_to_asset
 from trading_agent.core.deliberation import deliberate_ticker
+from trading_agent.core.macro import audit_us_market_regime, scan_generational_asymmetry_opportunities
 from trading_agent.core.config import (
     MIN_BETA_INVARIANT,
     MAX_BETA_COLLAR,
@@ -125,6 +126,14 @@ TOOL_METADATA = {
         "destructiveHint": False,
         "idempotentHint": True,
         "openWorldHint": False,
+    },
+    "trading_get_market_regime": {
+        "title": "Get Market Regime & Opportunity Radar",
+        "description": "Analyzes current US market regime (what happened, state, forward outlook) and scans for generational valuation dislocations ('The Sale Radar').",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
     },
 }
 
@@ -255,6 +264,16 @@ def handle_run_agent_evals() -> Dict[str, Any]:
         "stderr": res.stderr
     }
 
+def handle_get_market_regime() -> Dict[str, Any]:
+    token = get_tickertape_token()
+    regime = audit_us_market_regime(token)
+    opportunities = scan_generational_asymmetry_opportunities(token)
+    return {
+        "status": "success",
+        "market_regime": regime,
+        "sale_radar_opportunities": opportunities
+    }
+
 # =============================================================================
 # MODERN MCP 2.x INITIALIZATION
 # =============================================================================
@@ -353,6 +372,16 @@ if USE_OFFICIAL_MCP:
         """Runs the 2026 SOTA Agentic Evaluation and Fiduciary Anti-Ruin benchmark test suite."""
         return json.dumps(handle_run_agent_evals(), indent=2)
 
+    @mcp_app.tool(
+        name="trading_get_market_regime",
+        title="Get Market Regime & Opportunity Radar",
+        description="Analyzes the current US market regime and scans for once-in-a-lifetime valuation dislocations ('The Sale Radar').",
+        annotations=make_annotations("trading_get_market_regime")
+    )
+    def trading_get_market_regime() -> str:
+        """Analyzes the current US market regime and scans for once-in-a-lifetime valuation dislocations ('The Sale Radar')."""
+        return json.dumps(handle_get_market_regime(), indent=2)
+
     # 2. Resources Registration
     @mcp_app.resource("resource://portfolio/status")
     def get_portfolio_status_resource() -> str:
@@ -375,6 +404,11 @@ if USE_OFFICIAL_MCP:
     def get_portfolio_memory_resource() -> str:
         """Persistent factor weights and agent memory resource."""
         return json.dumps(handle_get_memory_state(), indent=2)
+
+    @mcp_app.resource("resource://market/regime")
+    def get_market_regime_resource() -> str:
+        """Dynamic US macro market regime and Generational Opportunity Sale Radar."""
+        return json.dumps(handle_get_market_regime(), indent=2)
 
     # 3. Prompts Registration
     @mcp_app.prompt()

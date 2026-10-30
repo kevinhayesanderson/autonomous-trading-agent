@@ -147,11 +147,13 @@ python agent.py kite-status
 | `trading_get_memory_state` | None | Inspects 4-tier memory, factor weights, and trade history |
 | `trading_run_system_test` | None | Runs 7-phase mathematical verification suite |
 | `trading_run_agent_evals` | None | Runs 2026 SOTA agentic evaluation & fiduciary benchmark suite |
+| `trading_get_market_regime` | None | US macro regime analysis & Generational Asymmetry Sale Radar |
 
 #### Resources (`resources/list` & `resources/read`)
 * `resource://portfolio/status`: Real-time JSON snapshot of portfolio holdings, settled cash, and stop-loss/take-profit status.
 * `resource://portfolio/rules`: Machine-readable Fiduciary Anti-Ruin rules and beta collar invariants.
 * `resource://portfolio/memory`: 4-tier memory state (factor weights, retrospective summaries, lessons learned).
+* `resource://market/regime`: Dynamic US macro market regime and Generational Opportunity Sale Radar.
 
 #### Prompts (`prompts/list` & `prompts/get`)
 * `committee_deliberation(ticker)`: Interactive prompt for conducting a full multi-agent committee debate.
