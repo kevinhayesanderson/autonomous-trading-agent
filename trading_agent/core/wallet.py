@@ -110,3 +110,100 @@ def drain_wallet_to_asset(ticker: str = "ASML") -> Dict[str, Any]:
     else:
         print(f"[FAILURE] Order placement failed: {res}")
         return {"status": "FAILED", "details": res}
+
+def topup_active_holdings(mode: str = "balanced", execute: bool = False) -> Dict[str, Any]:
+    """
+    Tops up existing active conviction holdings (TSM, ASML, MU) using available settled cash.
+    Modes:
+    - 'balanced': Prioritizes underweight positions (e.g. MU) to bring all 3 into 33.3% equal portfolio weighting.
+    - 'equal': Splits deployable funds equally across all 3 active holdings.
+    """
+    from .risk import audit_portfolio_health
+    token = get_tickertape_token()
+    bal = call_tickertape_mcp(token, "us_account_balance")
+    avail = float(bal.get("availableFunds", 0.0)) if isinstance(bal, dict) else 0.0
+
+    print("=" * 80)
+    print(f" TOP-UP ACTIVE CONVICTION HOLDINGS (TSM, ASML, MU) | MODE: {mode.upper()}")
+    print("=" * 80)
+    print(f"[*] Available Settled Cash: ${avail:.2f} USD")
+
+    if avail < 3.0:
+        print("[!] Insufficient funds to top up holdings (minimum $3.00 USD required).")
+        return {"status": "INSUFFICIENT_FUNDS", "available": avail}
+
+    _, holdings = audit_portfolio_health(token)
+    active_tickers = ["MU", "TSM", "ASML"]
+    active_map = {h["ticker"]: h for h in holdings if h["ticker"] in active_tickers}
+
+    for t in active_tickers:
+        if t not in active_map:
+            active_map[t] = {"ticker": t, "current": 0.0, "invested": 0.0, "pnl_pct": 0.0}
+
+    total_current_equity = sum(h["current"] for h in active_map.values())
+    total_capital = total_current_equity + avail
+    target_equity_per_asset = total_capital / len(active_tickers)
+
+    # Obey 50% rolling wallet drain limit for immediate execution tranche
+    spendable_tranche = round(min(avail * 0.49, avail - 1.0), 2)
+    print(f"[*] 50% Rolling Safety Tranche Limit: ${spendable_tranche:.2f} USD (Max allowable per 60m window)")
+
+    allocations = []
+    if mode == "balanced":
+        # Calculate shortfall to reach target_equity_per_asset
+        shortfalls = {}
+        for t in active_tickers:
+            sf = max(0.0, target_equity_per_asset - active_map[t]["current"])
+            shortfalls[t] = sf
+        total_sf = sum(shortfalls.values())
+        if total_sf > 0:
+            for t in active_tickers:
+                alloc_amt = round((shortfalls[t] / total_sf) * spendable_tranche, 2)
+                if alloc_amt >= 1.0:
+                    allocations.append({"ticker": t, "amount": alloc_amt, "target": target_equity_per_asset})
+        else:
+            per_stock = round(spendable_tranche / len(active_tickers), 2)
+            for t in active_tickers:
+                allocations.append({"ticker": t, "amount": per_stock, "target": target_equity_per_asset})
+    else:  # equal
+        per_stock = round(spendable_tranche / len(active_tickers), 2)
+        for t in active_tickers:
+            allocations.append({"ticker": t, "amount": per_stock, "target": target_equity_per_asset})
+
+    total_alloc = sum(a["amount"] for a in allocations)
+    if total_alloc > spendable_tranche and allocations:
+        allocations[0]["amount"] = round(allocations[0]["amount"] - (total_alloc - spendable_tranche), 2)
+
+    print("\n--- Proposed Allocation Plan ---")
+    print(f" {'Ticker':<8} | {'Current Equity':<16} | {'Proposed Top-Up':<18} | {'Target Weight'}")
+    print("-" * 65)
+    for a in allocations:
+        t = a["ticker"]
+        cur = active_map[t]["current"]
+        new_tot = cur + a["amount"]
+        proj_wt = (new_tot / (total_current_equity + spendable_tranche)) * 100.0
+        print(f" {t:<8} | ${cur:>10.2f} USD   | +${a['amount']:>10.2f} USD     | {proj_wt:>5.1f}%")
+    print("-" * 65)
+    print(f"  * Total Tranche Deployed:  ${sum(a['amount'] for a in allocations):.2f} USD")
+    print(f"  * Residual Cash for Next Window: ${avail - sum(a['amount'] for a in allocations):.2f} USD")
+
+    if not execute:
+        print("\n[PREVIEW MODE] To execute this top-up live, run: python agent.py topup --execute")
+        return {"status": "PREVIEW", "allocations": allocations, "spendable_tranche": spendable_tranche}
+
+    print("\n[*] Committing live top-up orders with resilience...")
+    executed_orders = []
+    for a in allocations:
+        t = a["ticker"]
+        amt = a["amount"]
+        print(f"  -> Placing BUY for {t} (${amt:.2f} USD)...")
+        res = place_order_with_resilience(token, ticker=t, action="buy", amount=amt)
+        if res.get("status") == "SUCCESS":
+            oid = res.get("orderId")
+            print(f"  [SUCCESS] {t} BUY filled: Order ID {oid}")
+            record_drain_trade(t, amt, res.get("executionPrice", 0.0))
+            executed_orders.append({"ticker": t, "orderId": oid, "amount": amt})
+        else:
+            print(f"  [FAILURE] {t} order failed: {res.get('code')}")
+
+    return {"status": "COMPLETED", "orders": executed_orders}

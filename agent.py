@@ -121,6 +121,13 @@ def cmd_drain(args):
     ticker = getattr(args, "ticker", "ASML") or "ASML"
     drain_wallet_to_asset(ticker=ticker)
 
+def cmd_topup(args):
+    """Tops up existing active conviction holdings (TSM, ASML, MU) using settled cash."""
+    from trading_agent.core.wallet import topup_active_holdings
+    mode = getattr(args, "mode", "balanced") or "balanced"
+    is_exec = getattr(args, "execute", False)
+    topup_active_holdings(mode=mode, execute=is_exec)
+
 def cmd_retrospective(args):
     """Runs automated continuous self-learning, adversarial review & factor tuning."""
     from trading_agent.core.learning import run_monthly_self_learning_cycle
@@ -431,6 +438,11 @@ def cli_entrypoint():
     p_drain = subparsers.add_parser("drain", help="Drain settled cash into target leader respecting wallet safety")
     p_drain.add_argument("--ticker", default="ASML", help="Target ticker symbol (default: ASML)")
 
+    # topup
+    p_topup = subparsers.add_parser("topup", help="Top up existing active conviction holdings (TSM, ASML, MU) using settled cash")
+    p_topup.add_argument("--mode", choices=["balanced", "equal"], default="balanced", help="Top-up allocation mode (default: balanced)")
+    p_topup.add_argument("--execute", action="store_true", help="Execute live top-up orders directly")
+
     # retrospective / learn / evolve
     for r_cmd in ["retrospective", "learn", "evolve"]:
         p_retro = subparsers.add_parser(r_cmd, help="Run continuous self-learning, retrospective synthesis, and factor evolution")
@@ -509,6 +521,7 @@ def cli_entrypoint():
         "preview": cmd_preview,
         "execute": cmd_execute,
         "drain": cmd_drain,
+        "topup": cmd_topup,
         "retrospective": cmd_retrospective,
         "learn": cmd_learn,
         "evolve": cmd_learn,
