@@ -151,19 +151,34 @@ def evaluate_portfolio_rebalance(
     else:
         # Open slots: Buy top new candidate(s)
         candidates_to_buy = top_candidates[:min(available_slots, 2)]
-        split_buy_amt = round(net_spendable / len(candidates_to_buy), 2) if candidates_to_buy else 0.0
-        print("\n  --- [3. Target Buy Allocations (Concentrated Conviction Basket)] ---")
-        for c in candidates_to_buy:
-            q_val = c.get("consensus_q", c.get("q_score", 0.0))
-            target_buys.append({
-                "ticker": c["ticker"],
-                "name": c.get("name", c["ticker"]),
-                "price": c.get("price", 0.0),
-                "amount": split_buy_amt,
-                "q_score": q_val,
-                "is_top_up": False
-            })
-            print(f"  * BUY {c['ticker']:<5} (${c.get('name', '')[:25]}): ${split_buy_amt:.2f} USD (Consensus Score: {q_val:.2f})")
+        if not candidates_to_buy and retained_holdings:
+            print("\n  --- [3. Fallback: Top-Up Retained Holdings (Zero Limbo)] ---")
+            split_buy_amt = round(net_spendable / len(retained_holdings), 2)
+            for rh in retained_holdings:
+                t = rh["ticker"]
+                target_buys.append({
+                    "ticker": t,
+                    "name": t,
+                    "price": 0.0,
+                    "amount": split_buy_amt,
+                    "q_score": rh.get("holding_q", 50.0),
+                    "is_top_up": True
+                })
+                print(f"  * TOP-UP {t:<5}: ${split_buy_amt:.2f} USD (Retained Leader, Score: {rh.get('holding_q', 50.0):.1f})")
+        else:
+            split_buy_amt = round(net_spendable / len(candidates_to_buy), 2) if candidates_to_buy else 0.0
+            print("\n  --- [3. Target Buy Allocations (Concentrated Conviction Basket)] ---")
+            for c in candidates_to_buy:
+                q_val = c.get("consensus_q", c.get("q_score", 0.0))
+                target_buys.append({
+                    "ticker": c["ticker"],
+                    "name": c.get("name", c["ticker"]),
+                    "price": c.get("price", 0.0),
+                    "amount": split_buy_amt,
+                    "q_score": q_val,
+                    "is_top_up": False
+                })
+                print(f"  * BUY {c['ticker']:<5} (${c.get('name', '')[:25]}): ${split_buy_amt:.2f} USD (Consensus Score: {q_val:.2f})")
 
     return {
         "rebalance_actions": rebalance_actions,

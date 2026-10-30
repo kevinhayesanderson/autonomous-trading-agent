@@ -40,13 +40,36 @@ def run_quantitative_screener(token: str, active_weights: Dict[str, Any], count:
     2. Hyper-beta lottery tickets (Beta > 2.80)
     3. Falling knives (Price < SMA 200)
     """
+    # Query institutional universe (NASDAQ 100 / S&P 500) with proper match and project schema
+    uni_res = call_tickertape_mcp(token, "us_screener_universes", {})
+    asset_ids = None
+    if isinstance(uni_res, list):
+        for u in uni_res:
+            if u.get("title") == "NASDAQ 100":
+                asset_ids = u.get("assetIds", [])
+                break
+
     query = {
-        "filter": [
+        "sortBy": "6MReturn,100,*",
+        "sortOrder": -1,
+        "count": count
+    }
+    if asset_ids:
+        query["assetIds"] = asset_ids
+        query["match"] = json.dumps({"marketCapitalization": {"g": 20000}})
+        query["project"] = [
+            "marketCapitalization", "profitMarginPercent", "profitMarginPercent,100,*",
+            "beta", "prevClosePrice", "movingAverage200Day", "movingAverage50Day",
+            "6MReturn,100,*", "1MReturn,100,*", "forecastEpsGrowthPercent",
+            "analystBuyPercent", "returnOnEquityTtm,100,*",
+            "analystTargetPrice,prevClosePrice,-,prevClosePrice,/,100,*"
+        ]
+    else:
+        query["filter"] = [
             {"field": "sector", "operator": "in", "values": ["Technology"]},
             {"field": "marketCap", "operator": "in", "values": ["Mega Cap", "Large Cap"]}
-        ],
-        "sortBy": "6MReturn,100,*", "sortOrder": -1, "count": count
-    }
+        ]
+
     res = call_tickertape_mcp(token, "us_screener_stocks", query)
     items = res.get("result", []) if isinstance(res, dict) else []
 
@@ -63,7 +86,8 @@ def run_quantitative_screener(token: str, active_weights: Dict[str, Any], count:
         buy_pct = float(m.get("analystBuyPercent") or 0.0)
         
         # PRO Metrics
-        net_margin = float(m.get("profitMarginPercent,100,*") or 0.0)
+        raw_nm = float(m.get("profitMarginPercent,100,*") or m.get("profitMarginPercent") or 0.0)
+        net_margin = raw_nm * 100.0 if (0.0 < abs(raw_nm) <= 1.0) else raw_nm
         roe = float(m.get("returnOnEquityTtm,100,*") or 0.0)
         sma50 = float(m.get("movingAverage50Day") or 0.0)
         sma200 = float(m.get("movingAverage200Day") or 0.0)
