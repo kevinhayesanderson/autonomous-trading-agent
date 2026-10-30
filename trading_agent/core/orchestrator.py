@@ -37,6 +37,7 @@ from .deliberation import deliberate_ticker
 from .config import TRADE_JOURNAL_FILE
 from .rebalance import evaluate_portfolio_rebalance
 from .execution import place_order_with_resilience
+from .consensus import score_candidates_with_consensus
 
 def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] = None):
     """
@@ -139,7 +140,8 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
 
     # 3.1 US Screener
     print("  * US Market Scan (Tickertape PRO): Beta >= 1.40, Net Margin > 0%, Revenue Moat...")
-    us_candidates = run_quantitative_screener(tt_token, active_weights, count=6)
+    us_candidates = run_quantitative_screener(tt_token, active_weights, count=10)
+    us_candidates = score_candidates_with_consensus(us_candidates, active_weights)
     
     # 3.2 Indian Screener - Dynamic Whole-Market Scan from Scratch
     print("  * Indian Market Scan (Tickertape PRO): Beta >= 1.40, MCap > Rs 2,000 Cr, ROE >= 12%, Op Margin >= 10%...")
@@ -343,23 +345,49 @@ def run_dual_investment_agent(execute: bool = False, in_budget: Optional[float] 
     date_str = now.strftime("%Y-%m-%d")
     logged_ids = []
 
-    # 6.1 Execute US Orders into Tickertape / DriveWealth if target buys exist
-    if us_target_buys and us_avail >= 10.0:
-        print("\n[*] Placing live US orders into Tickertape / DriveWealth account...")
-        for b in us_target_buys:
-            t = b["ticker"]
-            amt = b["amount"]
-            p = b.get("price", 0.0)
-            ceil = b.get("limit_ceiling")
-            print(f"  -> Placing BUY order for {t} (${amt:.2f} USD)...")
-            res = place_order_with_resilience(tt_token, ticker=t, action="buy", amount=amt, limit_ceiling=ceil)
-            if res.get("status") == "SUCCESS":
-                oid = res.get("orderId")
-                print(f"  [SUCCESS] {t} BUY filled: Order ID {oid}")
-                record_trade_execution(t, b.get("name", t), 0.0, p, amt, {}, cycle_str, "BUY", reason="Dual-Orchestrated Rebalance")
-                logged_ids.append(f"us_tt_{now.strftime('%Y%m%d_%H%M%S')}_{t}")
-            else:
-                print(f"  [FAILURE] {t} BUY failed! Reason: {res.get('code')}")
+    # 6.1 Execute US Orders into Tickertape / DriveWealth
+    if us_rebal_res:
+        sells_to_execute = [ra for ra in us_rebal_res.get("rebalance_actions", []) if ra.get("amount_freed", 0.0) > 0.0]
+        if sells_to_execute:
+            print("\n[*] Placing live US SELL orders (Stop-Loss / Capital Recycling)...")
+            for s in sells_to_execute:
+                t = s["ticker"]
+                amt = s["amount_freed"]
+                print(f"  -> Placing SELL order for {t} (${amt:.2f} USD) | Trigger: {s['action']}...")
+                s_res = place_order_with_resilience(tt_token, ticker=t, action="sell", amount=amt)
+                if s_res.get("status") == "SUCCESS":
+                    oid = s_res.get("orderId")
+                    print(f"  [SUCCESS] {t} SELL filled: Order ID {oid}")
+                    record_trade_execution(t, t, 0.0, s.get("current_value", amt), amt, {}, cycle_str, "SELL", reason=s.get("reason", "Stop/Profit Trigger"))
+                    logged_ids.append(f"us_tt_{now.strftime('%Y%m%d_%H%M%S')}_{t}_SELL")
+                else:
+                    print(f"  [WARNING] {t} SELL failed! Error: {s_res.get('code')}")
+
+        # Refresh available wallet cash post-liquidation
+        bal_res = call_tickertape_mcp(tt_token, "us_account_balance")
+        refreshed_avail = float(bal_res.get("availableFunds", 0.0)) if isinstance(bal_res, dict) else us_avail
+        print(f"  * Available Funds Post-Sell: ${refreshed_avail:.2f} USD")
+
+        if us_target_buys and refreshed_avail >= 5.0:
+            print("\n[*] Placing live US BUY orders into Tickertape / DriveWealth account...")
+            for b in us_target_buys:
+                t = b["ticker"]
+                desired_amt = b["amount"]
+                # Sizing guard: cap at available funds minus small buffer
+                safe_amt = min(desired_amt, round(refreshed_avail * 0.98, 2))
+                if safe_amt < 1.0:
+                    continue
+                p = b.get("price", 0.0)
+                ceil = b.get("limit_ceiling")
+                print(f"  -> Placing BUY order for {t} (${safe_amt:.2f} USD)...")
+                res = place_order_with_resilience(tt_token, ticker=t, action="buy", amount=safe_amt, limit_ceiling=ceil)
+                if res.get("status") == "SUCCESS":
+                    oid = res.get("orderId")
+                    print(f"  [SUCCESS] {t} BUY filled: Order ID {oid}")
+                    record_trade_execution(t, b.get("name", t), 0.0, p, safe_amt, {}, cycle_str, "BUY", reason="Dual-Orchestrated Rebalance")
+                    logged_ids.append(f"us_tt_{now.strftime('%Y%m%d_%H%M%S')}_{t}")
+                else:
+                    print(f"  [FAILURE] {t} BUY failed! Reason: {res.get('code')}")
 
     # 6.2 Execute Indian Orders via Zerodha
     if zerodha_auth and zerodha_cash >= in_total_invested:
